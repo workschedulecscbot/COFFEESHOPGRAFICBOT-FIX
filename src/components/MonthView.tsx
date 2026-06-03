@@ -187,12 +187,6 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
   const { isDark } = useTheme();
   const dateStr = formatDate(year, month, day);
 
-  console.log(`\n\n🔴🔴🔴 [DayModal] ОТКРЫТ МОДАЛ ${dateStr} (день ${day}) 🔴🔴🔴\n`);
-  console.log(`[DayModal] Всего сотрудников: ${data.employees.length}`);
-  console.log(`[DayModal] Всего смен в базе: ${data.shifts.length}`);
-  const shiftsForDate = data.shifts.filter(s => s.date === dateStr);
-  console.log(`[DayModal] Смены на ${dateStr}: ${shiftsForDate.length} записей`, shiftsForDate);
-
   // Собираем всех кто работает
   const working: { name: string; role: string; color: string; shift: ShiftType; dept: Department | null; customStart?: string; customEnd?: string }[] = [];
   const absent:  { name: string; role: string; color: string; shift: ShiftType }[] = [];
@@ -200,9 +194,18 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
   data.employees.forEach(emp => {
     // Ищем ВСЕ записи для этого сотрудника в эту дату (может быть несколько должностей)
     const entries = data.shifts.filter(s => s.employeeId === emp.id && s.date === dateStr);
+    
+    // ДИАГНОСТИКА
+    if (emp.name === 'Овчаренко Владимир' && dateStr === '2026-06-30') {
+      console.log(`[DEBUG] Овчаренко на 30 июня:`);
+      console.log(`  - Ищу: employeeId="${emp.id}", date="${dateStr}"`);
+      console.log(`  - Найдено entries: ${entries.length}`, entries);
+      console.log(`  - Всего shifts: ${data.shifts.length}`);
+      const allForThisDate = data.shifts.filter(s => s.date === dateStr);
+      console.log(`  - Всего смен на эту дату: ${allForThisDate.length}`);
+    }
+    
     if (!entries.length) return;
-
-    console.log(`[DayModal] ${emp.name} на ${dateStr}: ${entries.length} записей`, entries);
 
     for (const entry of entries) {
       const shift: ShiftType = entry?.shift ?? 'off';
@@ -224,16 +227,12 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
         // 1. Две разные смены типов (День+Ночь, без часов) - ms.shift будет определен
         // 2. Несколько смен с часами (3Б 2К) - ms.hours будет > 0
         if (entry?.multipleShifts && entry.multipleShifts.length > 0) {
-          console.log(`[DayModal] ${emp.name}: НАЙДЕНЫ multipleShifts!`, entry.multipleShifts);
           // Проверяем есть ли у них часы или это комбо типов смен
           const hasHours = entry.multipleShifts.some(ms => ms.hours > 0);
           const hasShift = entry.multipleShifts.some(ms => ms.shift);
           
-          console.log(`[DayModal] ${emp.name}: hasHours=${hasHours}, hasShift=${hasShift}`);
-          
           if (!hasHours && hasShift) {
             // Это комбо типов смен - добавляем каждую как отдельную запись
-            console.log(`[DayModal] ${emp.name}: РАСШИРЯЮ multipleShifts комбо типов (${entry.multipleShifts.length} смен)`);
             entry.multipleShifts.forEach(ms => {
               if (ms.shift) {
                 working.push({ 
@@ -249,7 +248,6 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
             });
           } else {
             // Это смены с часами - добавляем как одну запись
-            console.log(`[DayModal] ${emp.name}: ДОБАВЛЯЮ как одну запись (смены с часами или нет multipleShifts)`);
             working.push({ name: emp.name, role, color: emp.color, shift, dept, customStart, customEnd });
           }
         } else {
