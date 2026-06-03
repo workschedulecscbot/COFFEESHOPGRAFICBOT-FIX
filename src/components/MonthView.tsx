@@ -55,8 +55,8 @@ function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: Shift
 
   // Проверяем multipleShifts - они могут быть либо с часами, либо с информацией о разных сменах
   if (entry.multipleShifts && entry.multipleShifts.length > 0) {
-    // Если есть multipleShifts с информацией о сменах (shift field) - это комбо двух смен
-    if (entry.multipleShifts.some(ms => ms.shift)) {
+    // Если есть multipleShifts с информацией о сменах (shift field и hours = 0) - это комбо двух смен типов
+    if (entry.multipleShifts.some(ms => ms.shift && ms.hours === 0)) {
       // Это комбинированные смены (День + Ночь и т.д.) - не показываем на календаре с часами
       return [];
     }
@@ -162,20 +162,31 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
     if (shift === 'vacation' || shift === 'sick') {
       absent.push({ name: emp.name, role, color: emp.color, shift });
     } else {
-      // Если есть multipleShifts с комбинированными сменами (разные типы)
-      if (entry?.multipleShifts && entry.multipleShifts.length > 0 && entry.multipleShifts.some(ms => ms.shift)) {
-        // Для каждой смены в multipleShifts добавляем отдельную запись
-        entry.multipleShifts.forEach(ms => {
-          working.push({ 
-            name: emp.name, 
-            role: ms.role || role, 
-            color: emp.color, 
-            shift: ms.shift || shift, 
-            dept: ms.dept as Department, 
-            customStart, 
-            customEnd 
+      // Если есть multipleShifts - это может быть:
+      // 1. Две разные смены типов (День+Ночь, без часов) - ms.shift будет определен
+      // 2. Несколько смен с часами (3Б 2К) - ms.hours будет > 0
+      if (entry?.multipleShifts && entry.multipleShifts.length > 0) {
+        // Проверяем есть ли у них часы или это комбо типов смен
+        const hasHours = entry.multipleShifts.some(ms => ms.hours > 0);
+        if (!hasHours) {
+          // Это комбо типов смен - добавляем каждую как отдельную запись
+          entry.multipleShifts.forEach(ms => {
+            if (ms.shift) {
+              working.push({ 
+                name: emp.name, 
+                role: ms.role || role,  // используем роль из multipleShift если есть
+                color: emp.color, 
+                shift: ms.shift, 
+                dept: ms.dept as Department, 
+                customStart, 
+                customEnd 
+              });
+            }
           });
-        });
+        } else {
+          // Это смены с часами - добавляем как одну запись
+          working.push({ name: emp.name, role, color: emp.color, shift, dept, customStart, customEnd });
+        }
       } else {
         working.push({ name: emp.name, role, color: emp.color, shift, dept, customStart, customEnd });
       }
