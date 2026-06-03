@@ -47,12 +47,6 @@ function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: Shift
   const entries = shifts.filter(s => s.employeeId === emp.id && s.date === dateStr);
   if (!entries.length) return [];
 
-  // Логирование
-  const hasMultiple = entries.some(e => e.multipleShifts?.length);
-  if (hasMultiple) {
-    console.log(`[getDaySegmentsForEmployee] ${emp.name} на ${dateStr}:`, entries);
-  }
-
   // Если есть shiftsWithTimes - не показываем на календаре
   if (entries.some(e => e.shiftsWithTimes?.length)) {
     return [];
@@ -68,7 +62,6 @@ function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: Shift
     // Если есть multipleShifts с информацией о типах смен (shift field)
     // показываем временные диапазоны для каждой смены
     if (entry.multipleShifts?.some(ms => ms.shift)) {
-      console.log(`[getDaySegmentsForEmployee] Показываем multipleShifts для ${emp.name}: ${entry.multipleShifts.length} смен`);
       for (const ms of entry.multipleShifts) {
         if (ms.shift) {
           const times = SHIFT_TIMES[ms.shift];
@@ -216,14 +209,14 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
         // 1. Две разные смены типов (День+Ночь, без часов) - ms.shift будет определен
         // 2. Несколько смен с часами (3Б 2К) - ms.hours будет > 0
         if (entry?.multipleShifts && entry.multipleShifts.length > 0) {
-          console.log(`[DayModal] ${emp.name} имеет multipleShifts:`, entry.multipleShifts);
           // Проверяем есть ли у них часы или это комбо типов смен
           const hasHours = entry.multipleShifts.some(ms => ms.hours > 0);
-          if (!hasHours) {
+          const hasShift = entry.multipleShifts.some(ms => ms.shift);
+          
+          if (!hasHours && hasShift) {
             // Это комбо типов смен - добавляем каждую как отдельную запись
             entry.multipleShifts.forEach(ms => {
               if (ms.shift) {
-                console.log(`[DayModal] Добавляем смену ${emp.name}: shift=${ms.shift}, role=${ms.role}`);
                 working.push({ 
                   name: emp.name, 
                   role: ms.role || role,  // используем роль из multipleShift если есть
