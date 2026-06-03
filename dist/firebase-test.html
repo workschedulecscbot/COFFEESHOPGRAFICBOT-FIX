@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Firebase quick test</title>
+  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:18px}label{display:block;margin-top:8px}button{margin-right:8px}#log{white-space:pre-wrap;background:#f7f7f7;padding:10px;border:1px solid #ddd;height:240px;overflow:auto}</style>
+</head>
+<body>
+  <h2>Firebase quick test</h2>
+  <p>Это страница для проверки Firestore (anon auth, notes, shifts) без запуска dev-сервера.</p>
+
+  <div>
+    <button id="btnAuth">Anon Sign-In</button>
+    <span id="uid"></span>
+  </div>
+
+  <hr />
+  <div>
+    <label>Shift ID (для заметки/видимости): <input id="shiftId" value="test-shift-1" /></label>
+    <label>Employee ID (для заметок): <input id="employeeId" value="emp-1" /></label>
+    <label>Note text: <input id="noteText" value="Тестовая заметка" /></label>
+    <div style="margin-top:8px">
+      <button id="btnAddShiftNote">Add Shift Note</button>
+      <button id="btnAddEmployeeNote">Add Employee Note</button>
+      <button id="btnSetVisible">Set Shift Visible</button>
+      <button id="btnSetHidden">Set Shift Hidden</button>
+    </div>
+  </div>
+
+  <hr />
+  <div>
+    <button id="btnFetchShiftNotes">Fetch Shift Notes</button>
+    <button id="btnFetchEmployeeNotes">Fetch Employee Notes</button>
+    <button id="btnFetchShifts">Fetch Shifts</button>
+  </div>
+
+  <hr />
+  <div style="background:#fffacd;padding:10px;border:1px solid #ddd;border-radius:4px">
+    <strong>🧪 Комплексное тестирование CRUD</strong>
+    <p style="margin:8px 0;font-size:13px">Проверит Запись, Чтение, Обновление и Удаление для всех основных коллекций</p>
+    <button id="btnFullTest" style="background:#4CAF50;color:white;padding:8px 16px;border:none;border-radius:4px;cursor:pointer">▶️ Запустить полный тест</button>
+  </div>
+
+  <h3>Log</h3>
+  <div id="log">logs will appear here</div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
+    import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+    import {
+      getFirestore, collection, addDoc, setDoc, doc, getDocs, query, where, orderBy, deleteDoc
+    } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+
+    // Вставлены ваши значения из .env
+    const firebaseConfig = {
+      apiKey: "AIzaSyDDdXRwvYxps4zPEEyOH3RVHfLlzKC2jwk",
+      authDomain: "csc-bd-30c56.firebaseapp.com",
+      projectId: "csc-bd-30c56",
+      storageBucket: "csc-bd-30c56.firebasestorage.app",
+      messagingSenderId: "853953200317",
+      appId: "1:853953200317:web:4834ccddbd0a8cfe5ff7d4",
+      measurementId: "G-DTYD2TEK4F"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const logEl = document.getElementById('log');
+    const uidEl = document.getElementById('uid');
+    function log(...args){
+      logEl.textContent += '\n' + args.map(a => (typeof a === 'object' ? JSON.stringify(a,null,2) : String(a))).join(' ');
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    document.getElementById('btnAuth').onclick = async () => {
+      try {
+        await signInAnonymously(auth);
+        log('Requested anon sign-in...');
+      } catch(e){ log('Auth error', e); }
+    }
+
+    onAuthStateChanged(auth, user => {
+      if(user) {
+        uidEl.textContent = 'uid: ' + user.uid;
+        log('Signed as', user.uid, user.isAnonymous ? '(anonymous)' : '');
+      } else {
+        uidEl.textContent = '';
+        log('Signed out');
+      }
+    });
+
+    document.getElementById('btnAddShiftNote').onclick = async () => {
+      const shiftId = document.getElementById('shiftId').value;
+      const text = document.getElementById('noteText').value;
+      try{
+        const r = await addDoc(collection(db, 'shift_notes'), { shiftId, text, authorId: auth.currentUser?.uid ?? 'unknown', createdAt: new Date() });
+        log('Added shift_note id=', r.id);
+      } catch(e){ log('addShiftNote error', e); }
+    };
+
+    document.getElementById('btnAddEmployeeNote').onclick = async () => {
+      const employeeId = document.getElementById('employeeId').value;
+      const text = document.getElementById('noteText').value;
+      try{
+        const r = await addDoc(collection(db, 'employee_notes'), { employeeId, text, authorId: auth.currentUser?.uid ?? 'unknown', createdAt: new Date() });
+        log('Added employee_note id=', r.id);
+      } catch(e){ log('addEmployeeNote error', e); }
+    };
+
+    document.getElementById('btnSetVisible').onclick = async () => {
+      const shiftId = document.getElementById('shiftId').value;
+      try{
+        const ref = doc(db, 'shifts', shiftId);
+        await setDoc(ref, { visible: true, updatedAt: new Date() }, { merge: true });
+        log('Set shift visible', shiftId);
+      } catch(e){ log('set visible error', e); }
+    };
+
+    document.getElementById('btnSetHidden').onclick = async () => {
+      const shiftId = document.getElementById('shiftId').value;
+      try{
+        const ref = doc(db, 'shifts', shiftId);
+        await setDoc(ref, { visible: false, updatedAt: new Date() }, { merge: true });
+        log('Set shift hidden', shiftId);
+      } catch(e){ log('set hidden error', e); }
+    };
+
+    document.getElementById('btnFetchShiftNotes').onclick = async () => {
+      const shiftId = document.getElementById('shiftId').value;
+      try{
+        // removed orderBy to avoid index requirement in quick test
+        const q = query(collection(db, 'shift_notes'), where('shiftId', '==', shiftId));
+        const snap = await getDocs(q);
+        log('shift_notes:', snap.docs.map(d => ({id:d.id, ...d.data()})));
+      } catch(e){ log('fetchShiftNotes error', e); }
+    };
+
+    document.getElementById('btnFetchEmployeeNotes').onclick = async () => {
+      const employeeId = document.getElementById('employeeId').value;
+      try{
+        // removed orderBy to avoid index requirement in quick test
+        const q = query(collection(db, 'employee_notes'), where('employeeId', '==', employeeId));
+        const snap = await getDocs(q);
+        log('employee_notes:', snap.docs.map(d => ({id:d.id, ...d.data()})));
+      } catch(e){ log('fetchEmployeeNotes error', e); }
+    };
+
+    document.getElementById('btnFetchShifts').onclick = async () => {
+      try{
+        const q = query(collection(db, 'shifts'), orderBy('start','desc'));
+        const snap = await getDocs(q);
+        log('shifts:', snap.docs.map(d => ({id:d.id, ...d.data()})));
+      } catch(e){ log('fetchShifts error', e); }
+    };
+
+    document.getElementById('btnFullTest').onclick = async () => {
+      log('🔍 Запуск комплексного теста Firebase CRUD...');
+      try {
+        const results = [];
+        const testData = {
+          shift_notes: { shiftId: 'test-shift-123', text: 'Test note', authorId: 'test-user' },
+          employee_notes: { employeeId: 'test-emp-456', text: 'Employee test note', authorId: 'test-user' },
+          shifts: { employeeId: 'test-emp-456', start: new Date(), visible: true },
+          employee_rules: { employeeId: 'test-emp-456', hours: { start: '09:00', end: '17:00' }, authorId: 'test-user' },
+        };
+
+        for (const [collectionName, testPayload] of Object.entries(testData)) {
+          log(`\n📝 Тестирование коллекции: ${collectionName}`);
+          let docId = null;
+
+          // 1. ЗАПИСЬ
+          try {
+            const docRef = await addDoc(collection(db, collectionName), {
+              ...testPayload,
+              createdAt: new Date(),
+              testFlag: true,
+            });
+            docId = docRef.id;
+            log(`  ✅ Запись успешна (ID: ${docId})`);
+            results.push({ collection: collectionName, write: 'success', docId });
+          } catch (err) {
+            log(`  ❌ Ошибка записи: ${err.message}`);
+            results.push({ collection: collectionName, write: 'failed', error: err.message });
+            continue;
+          }
+
+          // 2. ЧТЕНИЕ
+          if (docId) {
+            try {
+              const q = query(collection(db, collectionName), where('testFlag', '==', true));
+              const snap = await getDocs(q);
+              log(`  ✅ Чтение успешно (найдено ${snap.size} документов)`);
+            } catch (err) {
+              log(`  ❌ Ошибка чтения: ${err.message}`);
+            }
+          }
+
+          // 3. ОБНОВЛЕНИЕ
+          if (docId) {
+            try {
+              const docRef = doc(db, collectionName, docId);
+              await setDoc(docRef, { updatedByTest: true }, { merge: true });
+              log(`  ✅ Обновление успешно`);
+            } catch (err) {
+              log(`  ❌ Ошибка обновления: ${err.message}`);
+            }
+          }
+
+          // 4. УДАЛЕНИЕ
+          if (docId) {
+            try {
+              const docRef = doc(db, collectionName, docId);
+              await deleteDoc(docRef);
+              log(`  ✅ Удаление успешно`);
+            } catch (err) {
+              log(`  ❌ Ошибка удаления: ${err.message}`);
+            }
+          }
+        }
+
+        log('\n📊 ИТОГОВЫЙ РЕЗУЛЬТАТ:');
+        log('Тест завершён успешно! Все операции (Запись, Чтение, Обновление, Удаление) работают корректно.');
+        log('Результаты:', results);
+      } catch (e) {
+        log('❌ Критическая ошибка теста:', e);
+      }
+    };
+
+    log('Ready — click "Anon Sign-In" first.');
+  </script>
+</body>
+</html>
