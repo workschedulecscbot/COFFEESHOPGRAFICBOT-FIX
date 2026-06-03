@@ -372,6 +372,11 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
           // Объединяем в multipleShifts
           const existingDept = getDepartment(existing.role ?? emp.role) ?? emp.department ?? 'kitchen';
           
+          console.log(`[parseGoogleSheetsCSV] Объединяем смены для ${emp.name}:`, {
+            existing: { role: existing.role, shift: existing.shift, dept: existingDept },
+            new: { role: roleCell, shift, dept: deptForRow }
+          });
+          
           if (!existing.multipleShifts) {
             // Первый раз создаём multipleShifts - нужно сохранить первую смену
             existing.multipleShifts = [
@@ -386,6 +391,8 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
             shift: shift,
             role: roleCell
           });
+          
+          console.log(`[parseGoogleSheetsCSV] Результат multipleShifts:`, existing.multipleShifts);
         } else if (shift !== 'off' && existing.shift === 'off') {
           // Новая информация — рабочая смена, прежняя была off
           shifts[existingIdx] = { employeeId: emp!.id, date: isoDate, shift, role: roleCell || undefined };
@@ -407,6 +414,12 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
   void dataStartCol;
 
   const employees: Employee[] = Array.from(employeeMap.values());
+
+  // Логирование для отладки
+  const shiftsWithMultiple = shifts.filter(s => s.multipleShifts && s.multipleShifts.length > 0);
+  if (shiftsWithMultiple.length > 0) {
+    console.log(`[parseGoogleSheetsCSV] Найдено ${shiftsWithMultiple.length} смен с multipleShifts:`, shiftsWithMultiple.slice(0, 5));
+  }
 
   return {
     employees,
