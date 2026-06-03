@@ -17,16 +17,6 @@ const HEADER_WORDS = new Set([
   'вылеты', 'пассажиров', 'рейсов',
 ]);
 
-// Нормализует имя сотрудника для сравнения
-function normalizeName(name: string): string {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[\s\u00A0\u2000-\u200F]+/g, ' ')  // Все виды пробелов -> обычный пробел
-    .replace(/\s*[,;.].*$/, '')                 // Удаляем комментарии после запятой/точки
-    .trim();
-}
-
 function isEmployeeName(cell: string): boolean {
   const val = cell.trim();
   if (!val) return false;
@@ -70,7 +60,7 @@ function isRoleCell(cell: string): boolean {
 export function parseShiftValue(raw: string): { 
   type: ShiftType; 
   hours?: number; 
-  multipleShifts?: Array<{ dept: 'bar' | 'kitchen' | 'hall' | 'power' | 'bar_manager'; hours: number; shift?: ShiftType }>;
+  multipleShifts?: Array<{ dept: 'bar' | 'kitchen' | 'hall' | 'power' | 'bar_manager'; hours: number }>;
   shiftsWithTimes?: Array<{ role: string; dept: 'bar' | 'kitchen' | 'hall' | 'power' | 'bar_manager'; startTime: string; endTime: string }>;
 } {
   const v = raw.trim();
@@ -82,28 +72,6 @@ export function parseShiftValue(raw: string): {
   if (vLower === 'б' || vLower === 'бл' || vLower === 'болен' || vLower === 'больн' || vLower === 'больничный' || vLower === 'sick') return { type: 'sick' };
   if (vLower === 'д' || vLower === 'd' || vLower === 'день' || vLower === 'дн' || vLower === 'дневная') return { type: 'day' };
   if (vLower === 'н' || vLower === 'n' || vLower === 'ночь' || vLower === 'ноч' || vLower === 'ночная') return { type: 'night' };
-  
-  // Проверяем две смены через пробел (например "Д Н", "День Ночь", "Д Д")
-  const parts = v.trim().split(/\s+/);
-  if (parts.length === 2) {
-    const shiftMap: Record<string, ShiftType> = {
-      'д': 'day', 'день': 'day', 'дн': 'day', 'дневная': 'day',
-      'н': 'night', 'ночь': 'night', 'ноч': 'night', 'ночная': 'night',
-      'с': 'daily', 'сут': 'daily', 'сутки': 'daily',
-
-    };
-    const shift1 = shiftMap[parts[0].toLowerCase()];
-    const shift2 = shiftMap[parts[1].toLowerCase()];
-    
-    if (shift1 && shift2) {
-      // Две смены! Создаём multipleShifts без часов (это просто комбо смен типов)
-      const multipleShifts: Array<{ dept: 'bar' | 'kitchen' | 'hall' | 'power' | 'bar_manager'; hours: number; shift?: ShiftType }> = [
-        { dept: 'bar', hours: 0, shift: shift1 },
-        { dept: 'kitchen', hours: 0, shift: shift2 }
-      ];
-      return { type: shift1, multipleShifts };
-    }
-  }
   
   // Сначала проверяем формат с временем (например "Бармен 12-15 Повар 15-17")
   // Паттерн: "РольНазвание ЧЧ-ЧЧ РольНазвание ЧЧ-ЧЧ"
@@ -288,8 +256,7 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
     if (!isRoleCell(roleCell)) continue;
     if (!isEmployeeName(nameCell)) continue;
 
-    // Нормализуем имя для поиска по сотрудникам
-    const nameLower = normalizeName(nameCell);
+    const nameLower = nameCell.toLowerCase();
     let emp = employeeMap.get(nameLower);
 
     if (!emp) {
@@ -327,17 +294,13 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
       const multipleShifts = parsed.multipleShifts;
       const shiftsWithTimes = parsed.shiftsWithTimes;
 
+      
+
       const existingIdx = shifts.findIndex(s => s.employeeId === emp!.id && s.date === isoDate);
 
-      // Если смена пуста, пропускаем
-      if (shift === 'off' && !hours && !multipleShifts && !shiftsWithTimes) continue;
-
-      // Обработка существующей записи смены для этого сотрудника в эту дату
-      // Логика приоритета:
-      // 1. shiftsWithTimes - полная информация о смене(ах) с временем (="Роль ЧЧ-ЧЧ Роль2 ЧЧ-ЧЧ") - только если явно указано в ячейке
-      // 2. multipleShifts - несколько смен разных отделов в один день (Бармен день + Повар ночь)
-      // 3. hours - числовые часы для одной роли
-      // 4. shift !== 'off' && existing.shift === 'off' - замена off на рабочую смену
+      // Числовые значения в ячейке считаем отработанными часами: сохраняем в поле hours,
+      // но не переводим автоматически в смену 'day'. Если парсер вернул реальную смену (не 'off'),
+      // она сохраняется как обычно.
       if (existingIdx !== -1) {
         const existing = shifts[existingIdx];
         const deptForRow = getDepartment(roleCell) ?? emp.department ?? 'kitchen';
@@ -367,28 +330,6 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
             hours: total,
             multipleShifts: existingShifts,
           };
-        } else if (shift !== 'off' && existing.shift !== 'off') {
-          // Две разные рабочие смены для одного человека разных должностей (Бармен день + Повар ночь)
-          // Объединяем в multipleShifts
-          const existingDept = getDepartment(existing.role ?? emp.role) ?? emp.department ?? 'kitchen';
-          
-          console.log(`[parseGoogleSheetsCSV] Объединяю смены для ${emp.name} на ${isoDate}: ${existing.shift} + ${shift}`);
-          
-          // Создаём массив с обеими сменами
-          const combined: Array<{ dept: 'bar' | 'kitchen' | 'hall' | 'power' | 'bar_manager'; hours: number; shift: ShiftType; role?: string }> = [
-            { dept: existingDept, hours: 0, shift: existing.shift, role: existing.role },
-            { dept: deptForRow, hours: 0, shift, role: roleCell }
-          ];
-          
-          console.log(`[parseGoogleSheetsCSV] Результат multipleShifts:`, combined);
-          
-          // Обновляем запись
-          shifts[existingIdx] = {
-            ...existing,
-            shift: existing.shift,  // сохраняем первую смену как основную
-            multipleShifts: combined,
-            hours: undefined,  // сбрасываем часы
-          };
         } else if (shift !== 'off' && existing.shift === 'off') {
           // Новая информация — рабочая смена, прежняя была off
           shifts[existingIdx] = { employeeId: emp!.id, date: isoDate, shift, role: roleCell || undefined };
@@ -410,10 +351,6 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
   void dataStartCol;
 
   const employees: Employee[] = Array.from(employeeMap.values());
-
-  // Логирование multipleShifts
-  const withMS = shifts.filter(s => s.multipleShifts && s.multipleShifts.length > 0);
-  console.log(`[parseGoogleSheetsCSV] Найдено ${withMS.length} смен с multipleShifts:`, withMS.slice(0, 3));
 
   return {
     employees,

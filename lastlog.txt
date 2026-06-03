@@ -1,0 +1,495 @@
+[Telegram.WebView] > postEvent web_app_set_header_color {color_key: 'bg_color'}
+telegram-web-app.js:135 [Telegram.WebView] > postEvent web_app_set_bottom_bar_color {color: '#ffffff'}
+telegram-web-app.js:135 [Telegram.WebView] > postEvent web_app_request_theme 
+telegram-web-app.js:135 [Telegram.WebView] > postEvent web_app_request_viewport 
+telegram-web-app.js:135 [Telegram.WebView] > postEvent web_app_request_safe_area 
+telegram-web-app.js:135 [Telegram.WebView] > postEvent web_app_request_content_safe_area 
+(index):17 [2026-03-21T21:54:04.826Z]  @firebase/firestore: Firestore (10.14.1): enableIndexedDbPersistence() will be deprecated in the future, you can use `FirestoreSettings.cache` instead.
+bI @ (index):17
+warn @ (index):17
+Ca @ (index):25
+IC @ (index):38
+(anonymous) @ (index):39
+(index):54 [Main] Starting app initialization...
+content-script.js:22 Document already loaded, running initialization immediately
+content-script.js:4 Attempting to initialize AdUnit
+content-script.js:6 AdUnit initialized successfully
+(index):39 [Firebase] Anonymous auth established: KByJOlCI3GT5VprUKIGpMhplljk1
+(index):54 [Main] Firebase auth ready, UID: KByJOlCI3GT5VprUKIGpMhplljk1
+(index):39 🔍 [Firebase] Starting comprehensive connection test...
+(index):39 📝 Current user: wr {providerId: 'firebase', proactiveRefresh: JC, reloadUserInfo: {…}, reloadListener: null, uid: 'KByJOlCI3GT5VprUKIGpMhplljk1', …}
+(index):39 📝 Current UID: KByJOlCI3GT5VprUKIGpMhplljk1
+(index):38 🔍 [Firebase] Starting comprehensive CRUD test...
+(index):38 📝 [Firebase] Writing to shift_notes...
+(index):54 [Main] App mounted successfully
+(index):53 [App] Fetching sheet for month: {id: '1n5FzbrDQKp_kYCbCQ6DIMmXMWadwcbl7ccrWAzBJEiY', month: 2, year: 2026, gid: '0'}
+(index):53 [App] Using Apps Script: https://script.google.com/macros/s/AKfycbz1CSkgdNoCfExOQxbCQoceInqFubJlGXKW10awXG99ron29IgTJMZeOx6nCseMGqSx/exec
+(index):53 [App] Fetching from Apps Script: https://script.google.com/macros/s/AKfycbz1CSkgdNoCfExOQxbCQoceInqFubJlGXKW10awXG99ron29IgTJMZeOx6nCseMGqSx/exec?sheet=%D0%A4%D0%95%D0%92%D0%A0%D0%90%D0%9B%D0%AC%202026
+(index):53 [useGoogleSheets] Загружаем данные сотрудников из: https://script.google.com/macros/s/AKfycbyKT6tqexp3816Nm7ROYS36GaMEK36lEr5VyTpm_H4LLSALv2iwV-RWxqmNDZDleW0H/exec?_t=1774130045292
+(index):54 [App] Setting up emp_prefs listener...
+(index):39 [Firebase] Watch shift_edits updated: 6 items
+(index):39 [ShiftsView] *** FIREBASE SHIFT EDITS UPDATED *** {undefined-undefined: {…}, emp_агеева_дарья-2026-03-23: {…}, emp_агеева_дарья-2026-03-24: {…}, emp_овчаренко_владимир-2026-03-25: {…}, emp_овчаренко_владимир-2026-03-28: {…}, …}
+(index):39 [ShiftsView] Total shift edits from Firebase: 6
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 2-2026-1 6 edits
+(index):39 [Firebase] Watch emp_prefs updated: 0 items
+(index):54 [App] 🔄 emp_prefs updated from Firebase: 0 items
+(index):39 [AdminEdits] Cached employee prefs to localStorage (merged) 0 items
+(index):39 ✅ [Firebase] employee_notes: 0 documents
+(index):38 ✅ [Firebase] shift_notes: Write successful (docId: JHExzAqFEHBGXvjSeN6d)
+(index):38 📖 [Firebase] Reading from shift_notes...
+(index):39 [Firebase] Watch shift_edits updated: 5 items
+(index):39 [ShiftsView] *** FIREBASE SHIFT EDITS UPDATED *** {emp_агеева_дарья-2026-03-23: {…}, emp_агеева_дарья-2026-03-24: {…}, emp_овчаренко_владимир-2026-03-25: {…}, emp_овчаренко_владимир-2026-03-28: {…}, emp_шмаков_радислав-2026-03-29: {…}}
+(index):39 [ShiftsView] Total shift edits from Firebase: 5
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 2-2026-2 5 edits
+(index):39 ✅ [Firebase] shift_notes: 2 documents
+(index):38 ✅ [Firebase] shift_notes: Read successful (found 1 test documents)
+(index):38 🔎 [Firebase] shift_notes: Sample doc data: {shiftId: 'test-shift-123', text: 'Test note', authorId: 'test-user', testFlag: true, createdAt: Mt}
+(index):38 ✏️ [Firebase] Updating shift_notes/JHExzAqFEHBGXvjSeN6d...
+(index):39 ✅ [Firebase] shifts: 0 documents
+(index):39 ✅ [Firebase] shift_edits: 5 documents
+(index):38 ✅ [Firebase] shift_notes: Update successful
+(index):38 🗑️ [Firebase] Deleting shift_notes/JHExzAqFEHBGXvjSeN6d...
+(index):39 ✅ [Firebase] emp_notes: 0 documents
+(index):39 ✅ [Firebase] emp_prefs: 0 documents
+(index):38 ✅ [Firebase] shift_notes: Delete successful
+(index):38 📝 [Firebase] Writing to employee_notes...
+(index):39 ✅ [Firebase] user_links: 9 documents
+(index):39 ✨ [Firebase] Test completed successfully!
+(index):38 ✅ [Firebase] employee_notes: Write successful (docId: yQjC6vhEfDeeyDjno8aJ)
+(index):38 📖 [Firebase] Reading from employee_notes...
+(index):38 ✅ [Firebase] employee_notes: Read successful (found 1 test documents)
+(index):38 🔎 [Firebase] employee_notes: Sample doc data: {employeeId: 'test-emp-456', text: 'Employee test note', authorId: 'test-user', testFlag: true, createdAt: Mt}
+(index):38 ✏️ [Firebase] Updating employee_notes/yQjC6vhEfDeeyDjno8aJ...
+(index):38 ✅ [Firebase] employee_notes: Update successful
+(index):38 🗑️ [Firebase] Deleting employee_notes/yQjC6vhEfDeeyDjno8aJ...
+(index):38 ✅ [Firebase] employee_notes: Delete successful
+(index):38 📝 [Firebase] Writing to shifts...
+(index):38 ✅ [Firebase] shifts: Write successful (docId: lDyS16790XXMi1vHSzoj)
+(index):38 📖 [Firebase] Reading from shifts...
+(index):38 ✅ [Firebase] shifts: Read successful (found 1 test documents)
+(index):38 🔎 [Firebase] shifts: Sample doc data: {employeeId: 'test-emp-456', start: Mt, visible: true, testFlag: true, createdAt: Mt}
+(index):38 ✏️ [Firebase] Updating shifts/lDyS16790XXMi1vHSzoj...
+(index):38 ✅ [Firebase] shifts: Update successful
+(index):38 🗑️ [Firebase] Deleting shifts/lDyS16790XXMi1vHSzoj...
+(index):38 ✅ [Firebase] shifts: Delete successful
+(index):38 📝 [Firebase] Writing to emp_notes...
+(index):38 ✅ [Firebase] emp_notes: Write successful (docId: d1wZfBpXZuph5p4szOXn)
+(index):38 📖 [Firebase] Reading from emp_notes...
+(index):38 ✅ [Firebase] emp_notes: Read successful (found 1 test documents)
+(index):38 🔎 [Firebase] emp_notes: Sample doc data: {employeeId: 'test-emp-456', text: 'Test emp note', authorId: 'test-user', testFlag: true, createdAt: Mt}
+(index):38 ✏️ [Firebase] Updating emp_notes/d1wZfBpXZuph5p4szOXn...
+(index):38 ✅ [Firebase] emp_notes: Update successful
+(index):38 🗑️ [Firebase] Deleting emp_notes/d1wZfBpXZuph5p4szOXn...
+(index):38 ✅ [Firebase] emp_notes: Delete successful
+(index):38 📝 [Firebase] Writing to shift_edits...
+(index):39 [Firebase] Watch shift_edits updated: 6 items
+(index):39 [ShiftsView] *** FIREBASE SHIFT EDITS UPDATED *** {undefined-undefined: {…}, emp_агеева_дарья-2026-03-23: {…}, emp_агеева_дарья-2026-03-24: {…}, emp_овчаренко_владимир-2026-03-25: {…}, emp_овчаренко_владимир-2026-03-28: {…}, …}
+(index):39 [ShiftsView] Total shift edits from Firebase: 6
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 2-2026-3 6 edits
+(index):38 ✅ [Firebase] shift_edits: Write successful (docId: RGTal489ppdHuc7m1Y3y)
+(index):38 📖 [Firebase] Reading from shift_edits...
+(index):39 [Firebase] Watch shift_edits updated: 6 items
+(index):39 [ShiftsView] *** FIREBASE SHIFT EDITS UPDATED *** {undefined-undefined: {…}, emp_агеева_дарья-2026-03-23: {…}, emp_агеева_дарья-2026-03-24: {…}, emp_овчаренко_владимир-2026-03-25: {…}, emp_овчаренко_владимир-2026-03-28: {…}, …}
+(index):39 [ShiftsView] Total shift edits from Firebase: 6
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 2-2026-4 6 edits
+(index):38 ✅ [Firebase] shift_edits: Read successful (found 1 test documents)
+(index):38 🔎 [Firebase] shift_edits: Sample doc data: {changes: {…}, testFlag: true, createdAt: Mt, editorId: 'test-user', shiftId: 'test-shift-123'}
+(index):38 ✏️ [Firebase] Updating shift_edits/RGTal489ppdHuc7m1Y3y...
+(index):39 [Firebase] Watch shift_edits updated: 6 items
+(index):39 [ShiftsView] *** FIREBASE SHIFT EDITS UPDATED *** {undefined-undefined: {…}, emp_агеева_дарья-2026-03-23: {…}, emp_агеева_дарья-2026-03-24: {…}, emp_овчаренко_владимир-2026-03-25: {…}, emp_овчаренко_владимир-2026-03-28: {…}, …}
+(index):39 [ShiftsView] Total shift edits from Firebase: 6
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 2-2026-5 6 edits
+(index):38 ✅ [Firebase] shift_edits: Update successful
+(index):38 🗑️ [Firebase] Deleting shift_edits/RGTal489ppdHuc7m1Y3y...
+(index):39 [Firebase] Watch shift_edits updated: 5 items
+(index):39 [ShiftsView] *** FIREBASE SHIFT EDITS UPDATED *** {emp_агеева_дарья-2026-03-23: {…}, emp_агеева_дарья-2026-03-24: {…}, emp_овчаренко_владимир-2026-03-25: {…}, emp_овчаренко_владимир-2026-03-28: {…}, emp_шмаков_радислав-2026-03-29: {…}}
+(index):39 [ShiftsView] Total shift edits from Firebase: 5
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 2-2026-6 5 edits
+(index):38 ✅ [Firebase] shift_edits: Delete successful
+(index):38 📝 [Firebase] Writing to user_links...
+(index):38 ✅ [Firebase] user_links: Write successful (docId: tdN3Ei9TAxRpWn9RfX26)
+(index):38 📖 [Firebase] Reading from user_links...
+(index):38 ✅ [Firebase] user_links: Read successful (found 1 test documents)
+(index):38 🔎 [Firebase] user_links: Sample doc data: {uid: 'test-uid', empId: 'test-emp-456', testFlag: true, createdAt: Mt}
+(index):38 ✏️ [Firebase] Updating user_links/tdN3Ei9TAxRpWn9RfX26...
+(index):38 ✅ [Firebase] user_links: Update successful
+(index):38 🗑️ [Firebase] Deleting user_links/tdN3Ei9TAxRpWn9RfX26...
+(index):38 ✅ [Firebase] user_links: Delete successful
+(index):38 
+📊 [Firebase] Test Summary: 6/6 collections passed all tests
+(index):39 [Firebase] Detailed Results: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+(index):53 [App] Apps Script returned: 72 rows
+(index):54 [App] 📋 Employee names from schedule: (40) ['агеева дарья', 'антонович оксана', 'брагина александра', 'будюкова екатерина', 'буняев кирилл', 'бучинскас богдан', 'голикова софия', 'долян милана', 'езеева мария', 'ерецкая валентина', 'зайкова евгения', 'иванина анастасия', 'иголкина марина', 'кауфман кирилл', 'кислер елена', 'клименко татьяна', 'колодин богдан', 'лисовец елизавета', 'ляшенко валерия', 'максимова жанна', 'мартель анастасия', 'матусевич денис', 'меликян софья', 'мурылев андрей', 'овчаренко владимир', 'олюнина дарья', 'печенкина марина', 'ролдугина наталья', 'романюк павел', 'свиридова лидия', 'скулинец людмила', 'турчак егор', 'усов виктор', 'чемезова ирина', 'шевчук елизавета', 'шишмарева галина', 'шмаков радислав', 'шмакова милена', 'яровой владислав', 'ярош алёна']
+(index):54 [App] 🔍 Searching for "Зайкова Евгения" (зайкова евгения) in map... Found: false
+(index):54 [App] ❌ No data found for "Зайкова Евгения" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Шишмарева Галина" (шишмарева галина) in map... Found: false
+(index):54 [App] ❌ No data found for "Шишмарева Галина" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Мурылев Андрей" (мурылев андрей) in map... Found: false
+(index):54 [App] ❌ No data found for "Мурылев Андрей" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Шмакова Милена" (шмакова милена) in map... Found: false
+(index):54 [App] ❌ No data found for "Шмакова Милена" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Буняев Кирилл" (буняев кирилл) in map... Found: false
+(index):54 [App] ❌ No data found for "Буняев Кирилл" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Меликян Софья" (меликян софья) in map... Found: false
+(index):54 [App] ❌ No data found for "Меликян Софья" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Свиридова Лидия" (свиридова лидия) in map... Found: false
+(index):54 [App] ❌ No data found for "Свиридова Лидия" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Усов Виктор" (усов виктор) in map... Found: false
+(index):54 [App] ❌ No data found for "Усов Виктор" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Агеева Дарья" (агеева дарья) in map... Found: false
+(index):54 [App] ❌ No data found for "Агеева Дарья" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Лисовец Елизавета" (лисовец елизавета) in map... Found: false
+(index):54 [App] ❌ No data found for "Лисовец Елизавета" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Колодин Богдан" (колодин богдан) in map... Found: false
+(index):54 [App] ❌ No data found for "Колодин Богдан" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Овчаренко Владимир" (овчаренко владимир) in map... Found: false
+(index):54 [App] ❌ No data found for "Овчаренко Владимир" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Романюк Павел" (романюк павел) in map... Found: false
+(index):54 [App] ❌ No data found for "Романюк Павел" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Печенкина Марина" (печенкина марина) in map... Found: false
+(index):54 [App] ❌ No data found for "Печенкина Марина" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Брагина Александра" (брагина александра) in map... Found: false
+(index):54 [App] ❌ No data found for "Брагина Александра" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Голикова София" (голикова софия) in map... Found: false
+(index):54 [App] ❌ No data found for "Голикова София" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Турчак Егор" (турчак егор) in map... Found: false
+(index):54 [App] ❌ No data found for "Турчак Егор" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Олюнина Дарья" (олюнина дарья) in map... Found: false
+(index):54 [App] ❌ No data found for "Олюнина Дарья" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Иванина Анастасия" (иванина анастасия) in map... Found: false
+(index):54 [App] ❌ No data found for "Иванина Анастасия" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Мартель Анастасия" (мартель анастасия) in map... Found: false
+(index):54 [App] ❌ No data found for "Мартель Анастасия" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Шмаков Радислав" (шмаков радислав) in map... Found: false
+(index):54 [App] ❌ No data found for "Шмаков Радислав" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Ярош Алёна" (ярош алёна) in map... Found: false
+(index):54 [App] ❌ No data found for "Ярош Алёна" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Иголкина Марина" (иголкина марина) in map... Found: false
+(index):54 [App] ❌ No data found for "Иголкина Марина" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Будюкова Екатерина" (будюкова екатерина) in map... Found: false
+(index):54 [App] ❌ No data found for "Будюкова Екатерина" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Кауфман Кирилл" (кауфман кирилл) in map... Found: false
+(index):54 [App] ❌ No data found for "Кауфман Кирилл" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Ляшенко Валерия" (ляшенко валерия) in map... Found: false
+(index):54 [App] ❌ No data found for "Ляшенко Валерия" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Бучинскас Богдан" (бучинскас богдан) in map... Found: false
+(index):54 [App] ❌ No data found for "Бучинскас Богдан" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Яровой Владислав" (яровой владислав) in map... Found: false
+(index):54 [App] ❌ No data found for "Яровой Владислав" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Матусевич Денис" (матусевич денис) in map... Found: false
+(index):54 [App] ❌ No data found for "Матусевич Денис" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Максимова Жанна" (максимова жанна) in map... Found: false
+(index):54 [App] ❌ No data found for "Максимова Жанна" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Чемезова Ирина" (чемезова ирина) in map... Found: false
+(index):54 [App] ❌ No data found for "Чемезова Ирина" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Клименко Татьяна" (клименко татьяна) in map... Found: false
+(index):54 [App] ❌ No data found for "Клименко Татьяна" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Ролдугина Наталья" (ролдугина наталья) in map... Found: false
+(index):54 [App] ❌ No data found for "Ролдугина Наталья" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Антонович Оксана" (антонович оксана) in map... Found: false
+(index):54 [App] ❌ No data found for "Антонович Оксана" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Скулинец Людмила" (скулинец людмила) in map... Found: false
+(index):54 [App] ❌ No data found for "Скулинец Людмила" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Ерецкая Валентина" (ерецкая валентина) in map... Found: false
+(index):54 [App] ❌ No data found for "Ерецкая Валентина" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Езеева Мария" (езеева мария) in map... Found: false
+(index):54 [App] ❌ No data found for "Езеева Мария" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Долян Милана" (долян милана) in map... Found: false
+(index):54 [App] ❌ No data found for "Долян Милана" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Кислер Елена" (кислер елена) in map... Found: false
+(index):54 [App] ❌ No data found for "Кислер Елена" in employeeDataMap (size: 0)
+(index):54 [App] 🔍 Searching for "Шевчук Елизавета" (шевчук елизавета) in map... Found: false
+(index):54 [App] ❌ No data found for "Шевчук Елизавета" in employeeDataMap (size: 0)
+(index):54 [App] 🎂 Employees with birthdays: нет
+(index):54 [App] 💬 Employees with Telegram: нет
+(index):54 [App] Sheet loaded successfully: {employees: 40, shifts: 1120}
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 2-2026-6 5 edits
+(index):53 [useGoogleSheets] Загружено сотрудников: 31
+(index):53 [useGoogleSheets] 🎂 Sample employee data: (3) [{…}, {…}, {…}]
+(index):54 [App] 🔍 Raw employee data from script: (31) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]
+(index):54 [App] ✅ Loaded data map: 31 employees
+(index):54 [App] 🔍 Map contents (sample): (5) [Array(2), Array(2), Array(2), Array(2), Array(2)]
+(index):54 [App] 📋 All employee names in map: (31) ['агеева дарья', 'андреева кристина', 'брагина александра', 'буняев кирилл', 'бучинскас богдан', 'вульчинский кирилл', 'зайкова евгения', 'иванина анастасия', 'иванова юлианна', 'иголкина марина', 'капля валерия', 'кауфман кирилл', 'кислер елена', 'колодин богдан', 'лисовец елизавета', 'ляшенко валерия', 'максимова жанна', 'мартель анастасия', 'овчаренко владимир', 'печенкина марина', 'рахманкулов ержан', 'романюк павел', 'суворов ярослав', 'токарев илья', 'усов виктор', 'чемезова ирина', 'шишмарева галина', 'шмаков радислав', 'шмакова милена', 'яровой владислав', 'ярош алёна']
+(index):54 [App] 🎂 All birthdays in map: none
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 2-2026-6 5 edits
+(index):54 [App] 📂 employeeDataMap updated, reloading sheet with birthday data...
+(index):53 [App] Fetching sheet for month: {id: '1n5FzbrDQKp_kYCbCQ6DIMmXMWadwcbl7ccrWAzBJEiY', month: 2, year: 2026, gid: '0'}
+(index):53 [App] Using Apps Script: https://script.google.com/macros/s/AKfycbz1CSkgdNoCfExOQxbCQoceInqFubJlGXKW10awXG99ron29IgTJMZeOx6nCseMGqSx/exec
+(index):53 [App] Fetching from Apps Script: https://script.google.com/macros/s/AKfycbz1CSkgdNoCfExOQxbCQoceInqFubJlGXKW10awXG99ron29IgTJMZeOx6nCseMGqSx/exec?sheet=%D0%A4%D0%95%D0%92%D0%A0%D0%90%D0%9B%D0%AC%202026
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 2-2026-6 5 edits
+(index):53 [App] Apps Script returned: 72 rows
+(index):54 [App] 📋 Employee names from schedule: (40) ['агеева дарья', 'антонович оксана', 'брагина александра', 'будюкова екатерина', 'буняев кирилл', 'бучинскас богдан', 'голикова софия', 'долян милана', 'езеева мария', 'ерецкая валентина', 'зайкова евгения', 'иванина анастасия', 'иголкина марина', 'кауфман кирилл', 'кислер елена', 'клименко татьяна', 'колодин богдан', 'лисовец елизавета', 'ляшенко валерия', 'максимова жанна', 'мартель анастасия', 'матусевич денис', 'меликян софья', 'мурылев андрей', 'овчаренко владимир', 'олюнина дарья', 'печенкина марина', 'ролдугина наталья', 'романюк павел', 'свиридова лидия', 'скулинец людмила', 'турчак егор', 'усов виктор', 'чемезова ирина', 'шевчук елизавета', 'шишмарева галина', 'шмаков радислав', 'шмакова милена', 'яровой владислав', 'ярош алёна']
+(index):54 [App] 🔍 Searching for "Зайкова Евгения" (зайкова евгения) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Зайкова Евгения: @@z_h_e_n_i_z_h_e_n_i
+(index):54 [App] 🔍 Searching for "Шишмарева Галина" (шишмарева галина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Шишмарева Галина: @@shisha_g
+(index):54 [App] 🔍 Searching for "Мурылев Андрей" (мурылев андрей) in map... Found: false
+(index):54 [App] ❌ No data found for "Мурылев Андрей" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Шмакова Милена" (шмакова милена) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Шмакова Милена: @@milkaaasss
+(index):54 [App] 🔍 Searching for "Буняев Кирилл" (буняев кирилл) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Буняев Кирилл: @@maliiiiiikkkkk
+(index):54 [App] 🔍 Searching for "Меликян Софья" (меликян софья) in map... Found: false
+(index):54 [App] ❌ No data found for "Меликян Софья" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Свиридова Лидия" (свиридова лидия) in map... Found: false
+(index):54 [App] ❌ No data found for "Свиридова Лидия" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Усов Виктор" (усов виктор) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Усов Виктор: @@dayyap5
+(index):54 [App] 🔍 Searching for "Агеева Дарья" (агеева дарья) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Агеева Дарья: @@ZXCVRAS
+(index):54 [App] 🔍 Searching for "Лисовец Елизавета" (лисовец елизавета) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Лисовец Елизавета: @@GroMaster_04
+(index):54 [App] 🔍 Searching for "Колодин Богдан" (колодин богдан) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Колодин Богдан: @@WIPMTS
+(index):54 [App] 🔍 Searching for "Овчаренко Владимир" (овчаренко владимир) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Овчаренко Владимир: @@silaysilaysilay
+(index):54 [App] 🔍 Searching for "Романюк Павел" (романюк павел) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Романюк Павел: @@paul_mishko
+(index):54 [App] 🔍 Searching for "Печенкина Марина" (печенкина марина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Печенкина Марина: @no
+(index):54 [App] 🔍 Searching for "Брагина Александра" (брагина александра) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Брагина Александра: @@AlexMuchoGusto
+(index):54 [App] 🔍 Searching for "Голикова София" (голикова софия) in map... Found: false
+(index):54 [App] ❌ No data found for "Голикова София" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Турчак Егор" (турчак егор) in map... Found: false
+(index):54 [App] ❌ No data found for "Турчак Егор" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Олюнина Дарья" (олюнина дарья) in map... Found: false
+(index):54 [App] ❌ No data found for "Олюнина Дарья" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Иванина Анастасия" (иванина анастасия) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Иванина Анастасия: @@anasisiz
+(index):54 [App] 🔍 Searching for "Мартель Анастасия" (мартель анастасия) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Мартель Анастасия: @@mortimartell
+(index):54 [App] 🔍 Searching for "Шмаков Радислав" (шмаков радислав) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Шмаков Радислав: @@zhelydddd
+(index):54 [App] 🔍 Searching for "Ярош Алёна" (ярош алёна) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Ярош Алёна: @@aikay123228
+(index):54 [App] 🔍 Searching for "Иголкина Марина" (иголкина марина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Иголкина Марина: @@l1l1l1l1l2
+(index):54 [App] 🔍 Searching for "Будюкова Екатерина" (будюкова екатерина) in map... Found: false
+(index):54 [App] ❌ No data found for "Будюкова Екатерина" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Кауфман Кирилл" (кауфман кирилл) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Кауфман Кирилл: @no
+(index):54 [App] 🔍 Searching for "Ляшенко Валерия" (ляшенко валерия) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Ляшенко Валерия: @no
+(index):54 [App] 🔍 Searching for "Бучинскас Богдан" (бучинскас богдан) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Бучинскас Богдан: @@pok1da1
+(index):54 [App] 🔍 Searching for "Яровой Владислав" (яровой владислав) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Яровой Владислав: @no
+(index):54 [App] 🔍 Searching for "Матусевич Денис" (матусевич денис) in map... Found: false
+(index):54 [App] ❌ No data found for "Матусевич Денис" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Максимова Жанна" (максимова жанна) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Максимова Жанна: @no
+(index):54 [App] 🔍 Searching for "Чемезова Ирина" (чемезова ирина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Чемезова Ирина: @@ir0ai
+(index):54 [App] 🔍 Searching for "Клименко Татьяна" (клименко татьяна) in map... Found: false
+(index):54 [App] ❌ No data found for "Клименко Татьяна" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Ролдугина Наталья" (ролдугина наталья) in map... Found: false
+(index):54 [App] ❌ No data found for "Ролдугина Наталья" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Антонович Оксана" (антонович оксана) in map... Found: false
+(index):54 [App] ❌ No data found for "Антонович Оксана" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Скулинец Людмила" (скулинец людмила) in map... Found: false
+(index):54 [App] ❌ No data found for "Скулинец Людмила" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Ерецкая Валентина" (ерецкая валентина) in map... Found: false
+(index):54 [App] ❌ No data found for "Ерецкая Валентина" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Езеева Мария" (езеева мария) in map... Found: false
+(index):54 [App] ❌ No data found for "Езеева Мария" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Долян Милана" (долян милана) in map... Found: false
+(index):54 [App] ❌ No data found for "Долян Милана" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Кислер Елена" (кислер елена) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Кислер Елена: @@Elena_Kisler
+(index):54 [App] 🔍 Searching for "Шевчук Елизавета" (шевчук елизавета) in map... Found: false
+(index):54 [App] ❌ No data found for "Шевчук Елизавета" in employeeDataMap (size: 31)
+(index):54 [App] 🎂 Employees with birthdays: нет
+(index):54 [App] 💬 Employees with Telegram: Зайкова Евгения (@@z_h_e_n_i_z_h_e_n_i), Шишмарева Галина (@@shisha_g), Шмакова Милена (@@milkaaasss), Буняев Кирилл (@@maliiiiiikkkkk), Усов Виктор (@@dayyap5), Агеева Дарья (@@ZXCVRAS), Лисовец Елизавета (@@GroMaster_04), Колодин Богдан (@@WIPMTS), Овчаренко Владимир (@@silaysilaysilay), Романюк Павел (@@paul_mishko), Печенкина Марина (@no), Брагина Александра (@@AlexMuchoGusto), Иванина Анастасия (@@anasisiz), Мартель Анастасия (@@mortimartell), Шмаков Радислав (@@zhelydddd), Ярош Алёна (@@aikay123228), Иголкина Марина (@@l1l1l1l1l2), Кауфман Кирилл (@no), Ляшенко Валерия (@no), Бучинскас Богдан (@@pok1da1), Яровой Владислав (@no), Максимова Жанна (@no), Чемезова Ирина (@@ir0ai), Кислер Елена (@@Elena_Kisler)
+(index):54 [App] Sheet loaded successfully: {employees: 40, shifts: 1120}
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 2-2026-6 5 edits
+(index):53 [App] Fetching sheet for month: {id: '1n5FzbrDQKp_kYCbCQ6DIMmXMWadwcbl7ccrWAzBJEiY', month: 3, year: 2026, gid: 755625953}
+(index):53 [App] Using Apps Script: https://script.google.com/macros/s/AKfycbz1CSkgdNoCfExOQxbCQoceInqFubJlGXKW10awXG99ron29IgTJMZeOx6nCseMGqSx/exec
+(index):53 [App] Fetching from Apps Script: https://script.google.com/macros/s/AKfycbz1CSkgdNoCfExOQxbCQoceInqFubJlGXKW10awXG99ron29IgTJMZeOx6nCseMGqSx/exec?sheet=%D0%9C%D0%90%D0%A0%D0%A2%202026
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 3-2026-6 5 edits
+(index):39 [ShiftsView] Retrieved Firebase shift edit for emp_овчаренко_владимир-2026-03-25 : {updatedAt: Mt, date: '2026-03-25', empId: 'emp_овчаренко_владимир', customEnd: '08:00', customStart: '11:00'}
+(index):39 [ShiftsView] Retrieved Firebase shift edit for emp_овчаренко_владимир-2026-03-28 : {date: '2026-03-28', updatedAt: Mt, empId: 'emp_овчаренко_владимир', customEnd: '08:00', note: '11-20', …}
+(index):54 [App] 📂 employeeDataMap updated, reloading sheet with birthday data...
+(index):53 [App] Fetching sheet for month: {id: '1n5FzbrDQKp_kYCbCQ6DIMmXMWadwcbl7ccrWAzBJEiY', month: 3, year: 2026, gid: 755625953}
+(index):53 [App] Using Apps Script: https://script.google.com/macros/s/AKfycbz1CSkgdNoCfExOQxbCQoceInqFubJlGXKW10awXG99ron29IgTJMZeOx6nCseMGqSx/exec
+(index):53 [App] Fetching from Apps Script: https://script.google.com/macros/s/AKfycbz1CSkgdNoCfExOQxbCQoceInqFubJlGXKW10awXG99ron29IgTJMZeOx6nCseMGqSx/exec?sheet=%D0%9C%D0%90%D0%A0%D0%A2%202026
+(index):53 [App] Apps Script returned: 73 rows
+(index):54 [App] 📋 Employee names from schedule: (41) ['агеева дарья', 'андреева кристина', 'антонович оксана', 'брагина александра', 'буняев кирилл', 'бучинскас богдан', 'вульчинский кирилл', 'зайкова евгения', 'иванина анастасия', 'иванова юлианна', 'иголкина марина', 'капля валерия', 'кауфман кирилл', 'кислер елена', 'колодин богдан', 'лисовец елизавета', 'ляшенко валерия', 'максимова жанна', 'мартель анастасия', 'матусевич денис', 'меликян софия', 'мурылев андрей', 'овчаренко владимир', 'олюнина дарья', 'печенкина марина', 'рахманкулов ержан', 'ролдугина наталья', 'романюк павел', 'свиридова лидия', 'скулинец людмила', 'суворов ярослав', 'тайлер дерден', 'токарев илья', 'усов виктор', 'чемезова ирина', 'черемисова карина', 'шишмарева галина', 'шмаков радислав', 'шмакова милена', 'яровой владислав', 'ярош алёна']
+(index):54 [App] 🔍 Searching for "Зайкова Евгения" (зайкова евгения) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Зайкова Евгения: @@z_h_e_n_i_z_h_e_n_i
+(index):54 [App] 🔍 Searching for "Шишмарева Галина" (шишмарева галина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Шишмарева Галина: @@shisha_g
+(index):54 [App] 🔍 Searching for "Вульчинский Кирилл" (вульчинский кирилл) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Вульчинский Кирилл: @no
+(index):54 [App] 🔍 Searching for "Шмакова Милена" (шмакова милена) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Шмакова Милена: @@milkaaasss
+(index):54 [App] 🔍 Searching for "Буняев Кирилл" (буняев кирилл) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Буняев Кирилл: @@maliiiiiikkkkk
+(index):54 [App] 🔍 Searching for "Печенкина Марина" (печенкина марина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Печенкина Марина: @no
+(index):54 [App] 🔍 Searching for "Лисовец Елизавета" (лисовец елизавета) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Лисовец Елизавета: @@GroMaster_04
+(index):54 [App] 🔍 Searching for "Овчаренко Владимир" (овчаренко владимир) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Овчаренко Владимир: @@silaysilaysilay
+(index):54 [App] 🔍 Searching for "Колодин Богдан" (колодин богдан) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Колодин Богдан: @@WIPMTS
+(index):54 [App] 🔍 Searching for "Брагина Александра" (брагина александра) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Брагина Александра: @@AlexMuchoGusto
+(index):54 [App] 🔍 Searching for "Усов Виктор" (усов виктор) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Усов Виктор: @@dayyap5
+(index):54 [App] 🔍 Searching for "Суворов Ярослав" (суворов ярослав) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Суворов Ярослав: @@NetOfHor
+(index):54 [App] 🔍 Searching for "Кислер Елена" (кислер елена) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Кислер Елена: @@Elena_Kisler
+(index):54 [App] 🔍 Searching for "Тайлер Дерден" (тайлер дерден) in map... Found: false
+(index):54 [App] ❌ No data found for "Тайлер Дерден" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Иголкина Марина" (иголкина марина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Иголкина Марина: @@l1l1l1l1l2
+(index):54 [App] 🔍 Searching for "Иванова Юлианна" (иванова юлианна) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Иванова Юлианна: @@geroin666
+(index):54 [App] 🔍 Searching for "Романюк Павел" (романюк павел) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Романюк Павел: @@paul_mishko
+(index):54 [App] 🔍 Searching for "Капля Валерия" (капля валерия) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Капля Валерия: @@Lyki_Ly
+(index):54 [App] 🔍 Searching for "Иванина Анастасия" (иванина анастасия) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Иванина Анастасия: @@anasisiz
+(index):54 [App] 🔍 Searching for "Агеева Дарья" (агеева дарья) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Агеева Дарья: @@ZXCVRAS
+(index):54 [App] 🔍 Searching for "Шмаков Радислав" (шмаков радислав) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Шмаков Радислав: @@zhelydddd
+(index):54 [App] 🔍 Searching for "Ярош Алёна" (ярош алёна) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Ярош Алёна: @@aikay123228
+(index):54 [App] 🔍 Searching for "Мартель Анастасия" (мартель анастасия) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Мартель Анастасия: @@mortimartell
+(index):54 [App] 🔍 Searching for "Кауфман Кирилл" (кауфман кирилл) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Кауфман Кирилл: @no
+(index):54 [App] 🔍 Searching for "Черемисова Карина" (черемисова карина) in map... Found: false
+(index):54 [App] ❌ No data found for "Черемисова Карина" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Ляшенко Валерия" (ляшенко валерия) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Ляшенко Валерия: @no
+(index):54 [App] 🔍 Searching for "Бучинскас Богдан" (бучинскас богдан) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Бучинскас Богдан: @@pok1da1
+(index):54 [App] 🔍 Searching for "Яровой Владислав" (яровой владислав) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Яровой Владислав: @no
+(index):54 [App] 🔍 Searching for "Токарев Илья" (токарев илья) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Токарев Илья: @no
+(index):54 [App] 🔍 Searching for "Максимова Жанна" (максимова жанна) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Максимова Жанна: @no
+(index):54 [App] 🔍 Searching for "Рахманкулов Ержан" (рахманкулов ержан) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Рахманкулов Ержан: @no
+(index):54 [App] 🔍 Searching for "Чемезова Ирина" (чемезова ирина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Чемезова Ирина: @@ir0ai
+(index):54 [App] 🔍 Searching for "Андреева Кристина" (андреева кристина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Андреева Кристина: @@krisssa666
+(index):54 [App] 🔍 Searching for "Мурылев Андрей" (мурылев андрей) in map... Found: false
+(index):54 [App] ❌ No data found for "Мурылев Андрей" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Ролдугина Наталья" (ролдугина наталья) in map... Found: false
+(index):54 [App] ❌ No data found for "Ролдугина Наталья" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Антонович Оксана" (антонович оксана) in map... Found: false
+(index):54 [App] ❌ No data found for "Антонович Оксана" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Скулинец Людмила" (скулинец людмила) in map... Found: false
+(index):54 [App] ❌ No data found for "Скулинец Людмила" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Меликян София" (меликян софия) in map... Found: false
+(index):54 [App] ❌ No data found for "Меликян София" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Матусевич Денис" (матусевич денис) in map... Found: false
+(index):54 [App] ❌ No data found for "Матусевич Денис" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Свиридова Лидия" (свиридова лидия) in map... Found: false
+(index):54 [App] ❌ No data found for "Свиридова Лидия" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Олюнина Дарья" (олюнина дарья) in map... Found: false
+(index):54 [App] ❌ No data found for "Олюнина Дарья" in employeeDataMap (size: 31)
+(index):54 [App] 🎂 Employees with birthdays: нет
+(index):54 [App] 💬 Employees with Telegram: Зайкова Евгения (@@z_h_e_n_i_z_h_e_n_i), Шишмарева Галина (@@shisha_g), Вульчинский Кирилл (@no), Шмакова Милена (@@milkaaasss), Буняев Кирилл (@@maliiiiiikkkkk), Печенкина Марина (@no), Лисовец Елизавета (@@GroMaster_04), Овчаренко Владимир (@@silaysilaysilay), Колодин Богдан (@@WIPMTS), Брагина Александра (@@AlexMuchoGusto), Усов Виктор (@@dayyap5), Суворов Ярослав (@@NetOfHor), Кислер Елена (@@Elena_Kisler), Иголкина Марина (@@l1l1l1l1l2), Иванова Юлианна (@@geroin666), Романюк Павел (@@paul_mishko), Капля Валерия (@@Lyki_Ly), Иванина Анастасия (@@anasisiz), Агеева Дарья (@@ZXCVRAS), Шмаков Радислав (@@zhelydddd), Ярош Алёна (@@aikay123228), Мартель Анастасия (@@mortimartell), Кауфман Кирилл (@no), Ляшенко Валерия (@no), Бучинскас Богдан (@@pok1da1), Яровой Владислав (@no), Токарев Илья (@no), Максимова Жанна (@no), Рахманкулов Ержан (@no), Чемезова Ирина (@@ir0ai), Андреева Кристина (@@krisssa666)
+(index):54 [App] Sheet loaded successfully: {employees: 41, shifts: 1271}
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 3-2026-6 5 edits
+(index):39 [ShiftsView] Retrieved Firebase shift edit for emp_овчаренко_владимир-2026-03-25 : {updatedAt: Mt, date: '2026-03-25', empId: 'emp_овчаренко_владимир', customEnd: '08:00', customStart: '11:00'}
+(index):39 [ShiftsView] Retrieved Firebase shift edit for emp_овчаренко_владимир-2026-03-28 : {date: '2026-03-28', updatedAt: Mt, empId: 'emp_овчаренко_владимир', customEnd: '08:00', note: '11-20', …}
+(index):53 [App] Apps Script returned: 73 rows
+(index):54 [App] 📋 Employee names from schedule: (41) ['агеева дарья', 'андреева кристина', 'антонович оксана', 'брагина александра', 'буняев кирилл', 'бучинскас богдан', 'вульчинский кирилл', 'зайкова евгения', 'иванина анастасия', 'иванова юлианна', 'иголкина марина', 'капля валерия', 'кауфман кирилл', 'кислер елена', 'колодин богдан', 'лисовец елизавета', 'ляшенко валерия', 'максимова жанна', 'мартель анастасия', 'матусевич денис', 'меликян софия', 'мурылев андрей', 'овчаренко владимир', 'олюнина дарья', 'печенкина марина', 'рахманкулов ержан', 'ролдугина наталья', 'романюк павел', 'свиридова лидия', 'скулинец людмила', 'суворов ярослав', 'тайлер дерден', 'токарев илья', 'усов виктор', 'чемезова ирина', 'черемисова карина', 'шишмарева галина', 'шмаков радислав', 'шмакова милена', 'яровой владислав', 'ярош алёна']
+(index):54 [App] 🔍 Searching for "Зайкова Евгения" (зайкова евгения) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Зайкова Евгения: @@z_h_e_n_i_z_h_e_n_i
+(index):54 [App] 🔍 Searching for "Шишмарева Галина" (шишмарева галина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Шишмарева Галина: @@shisha_g
+(index):54 [App] 🔍 Searching for "Вульчинский Кирилл" (вульчинский кирилл) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Вульчинский Кирилл: @no
+(index):54 [App] 🔍 Searching for "Шмакова Милена" (шмакова милена) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Шмакова Милена: @@milkaaasss
+(index):54 [App] 🔍 Searching for "Буняев Кирилл" (буняев кирилл) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Буняев Кирилл: @@maliiiiiikkkkk
+(index):54 [App] 🔍 Searching for "Печенкина Марина" (печенкина марина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Печенкина Марина: @no
+(index):54 [App] 🔍 Searching for "Лисовец Елизавета" (лисовец елизавета) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Лисовец Елизавета: @@GroMaster_04
+(index):54 [App] 🔍 Searching for "Овчаренко Владимир" (овчаренко владимир) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Овчаренко Владимир: @@silaysilaysilay
+(index):54 [App] 🔍 Searching for "Колодин Богдан" (колодин богдан) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Колодин Богдан: @@WIPMTS
+(index):54 [App] 🔍 Searching for "Брагина Александра" (брагина александра) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Брагина Александра: @@AlexMuchoGusto
+(index):54 [App] 🔍 Searching for "Усов Виктор" (усов виктор) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Усов Виктор: @@dayyap5
+(index):54 [App] 🔍 Searching for "Суворов Ярослав" (суворов ярослав) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Суворов Ярослав: @@NetOfHor
+(index):54 [App] 🔍 Searching for "Кислер Елена" (кислер елена) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Кислер Елена: @@Elena_Kisler
+(index):54 [App] 🔍 Searching for "Тайлер Дерден" (тайлер дерден) in map... Found: false
+(index):54 [App] ❌ No data found for "Тайлер Дерден" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Иголкина Марина" (иголкина марина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Иголкина Марина: @@l1l1l1l1l2
+(index):54 [App] 🔍 Searching for "Иванова Юлианна" (иванова юлианна) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Иванова Юлианна: @@geroin666
+(index):54 [App] 🔍 Searching for "Романюк Павел" (романюк павел) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Романюк Павел: @@paul_mishko
+(index):54 [App] 🔍 Searching for "Капля Валерия" (капля валерия) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Капля Валерия: @@Lyki_Ly
+(index):54 [App] 🔍 Searching for "Иванина Анастасия" (иванина анастасия) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Иванина Анастасия: @@anasisiz
+(index):54 [App] 🔍 Searching for "Агеева Дарья" (агеева дарья) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Агеева Дарья: @@ZXCVRAS
+(index):54 [App] 🔍 Searching for "Шмаков Радислав" (шмаков радислав) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Шмаков Радислав: @@zhelydddd
+(index):54 [App] 🔍 Searching for "Ярош Алёна" (ярош алёна) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Ярош Алёна: @@aikay123228
+(index):54 [App] 🔍 Searching for "Мартель Анастасия" (мартель анастасия) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Мартель Анастасия: @@mortimartell
+(index):54 [App] 🔍 Searching for "Кауфман Кирилл" (кауфман кирилл) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Кауфман Кирилл: @no
+(index):54 [App] 🔍 Searching for "Черемисова Карина" (черемисова карина) in map... Found: false
+(index):54 [App] ❌ No data found for "Черемисова Карина" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Ляшенко Валерия" (ляшенко валерия) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Ляшенко Валерия: @no
+(index):54 [App] 🔍 Searching for "Бучинскас Богдан" (бучинскас богдан) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Бучинскас Богдан: @@pok1da1
+(index):54 [App] 🔍 Searching for "Яровой Владислав" (яровой владислав) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Яровой Владислав: @no
+(index):54 [App] 🔍 Searching for "Токарев Илья" (токарев илья) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Токарев Илья: @no
+(index):54 [App] 🔍 Searching for "Максимова Жанна" (максимова жанна) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Максимова Жанна: @no
+(index):54 [App] 🔍 Searching for "Рахманкулов Ержан" (рахманкулов ержан) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Рахманкулов Ержан: @no
+(index):54 [App] 🔍 Searching for "Чемезова Ирина" (чемезова ирина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Чемезова Ирина: @@ir0ai
+(index):54 [App] 🔍 Searching for "Андреева Кристина" (андреева кристина) in map... Found: true
+(index):54 [App] 💬 Applied Telegram to Андреева Кристина: @@krisssa666
+(index):54 [App] 🔍 Searching for "Мурылев Андрей" (мурылев андрей) in map... Found: false
+(index):54 [App] ❌ No data found for "Мурылев Андрей" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Ролдугина Наталья" (ролдугина наталья) in map... Found: false
+(index):54 [App] ❌ No data found for "Ролдугина Наталья" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Антонович Оксана" (антонович оксана) in map... Found: false
+(index):54 [App] ❌ No data found for "Антонович Оксана" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Скулинец Людмила" (скулинец людмила) in map... Found: false
+(index):54 [App] ❌ No data found for "Скулинец Людмила" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Меликян София" (меликян софия) in map... Found: false
+(index):54 [App] ❌ No data found for "Меликян София" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Матусевич Денис" (матусевич денис) in map... Found: false
+(index):54 [App] ❌ No data found for "Матусевич Денис" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Свиридова Лидия" (свиридова лидия) in map... Found: false
+(index):54 [App] ❌ No data found for "Свиридова Лидия" in employeeDataMap (size: 31)
+(index):54 [App] 🔍 Searching for "Олюнина Дарья" (олюнина дарья) in map... Found: false
+(index):54 [App] ❌ No data found for "Олюнина Дарья" in employeeDataMap (size: 31)
+(index):54 [App] 🎂 Employees with birthdays: нет
+(index):54 [App] 💬 Employees with Telegram: Зайкова Евгения (@@z_h_e_n_i_z_h_e_n_i), Шишмарева Галина (@@shisha_g), Вульчинский Кирилл (@no), Шмакова Милена (@@milkaaasss), Буняев Кирилл (@@maliiiiiikkkkk), Печенкина Марина (@no), Лисовец Елизавета (@@GroMaster_04), Овчаренко Владимир (@@silaysilaysilay), Колодин Богдан (@@WIPMTS), Брагина Александра (@@AlexMuchoGusto), Усов Виктор (@@dayyap5), Суворов Ярослав (@@NetOfHor), Кислер Елена (@@Elena_Kisler), Иголкина Марина (@@l1l1l1l1l2), Иванова Юлианна (@@geroin666), Романюк Павел (@@paul_mishko), Капля Валерия (@@Lyki_Ly), Иванина Анастасия (@@anasisiz), Агеева Дарья (@@ZXCVRAS), Шмаков Радислав (@@zhelydddd), Ярош Алёна (@@aikay123228), Мартель Анастасия (@@mortimartell), Кауфман Кирилл (@no), Ляшенко Валерия (@no), Бучинскас Богдан (@@pok1da1), Яровой Владислав (@no), Токарев Илья (@no), Максимова Жанна (@no), Рахманкулов Ержан (@no), Чемезова Ирина (@@ir0ai), Андреева Кристина (@@krisssa666)
+(index):54 [App] Sheet loaded successfully: {employees: 41, shifts: 1271}
+(index):39 [ShiftsView] Calendar re-rendering with shiftEditsMap: 3-2026-6 5 edits
+(index):39 [ShiftsView] Retrieved Firebase shift edit for emp_овчаренко_владимир-2026-03-25 : {updatedAt: Mt, date: '2026-03-25', empId: 'emp_овчаренко_владимир', customEnd: '08:00', customStart: '11:00'}
+(index):39 [ShiftsView] Retrieved Firebase shift edit for emp_овчаренко_владимир-2026-03-28 : {date: '2026-03-28', updatedAt: Mt, empId: 'emp_овчаренко_владимир', customEnd: '08:00', note: '11-20', …}

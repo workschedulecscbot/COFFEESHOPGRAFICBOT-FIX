@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Connection Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        button {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #4338CA;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .log {
+            background: #1e1e1e;
+            color: #0DFF00;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 16px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .success { color: #4ADE80; }
+        .error { color: #F87171; }
+        .info { color: #60A5FA; }
+        .section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Firebase Connection Test</h1>
+        
+        <button onclick="testBasicConnection()">1️⃣ Test Basic Connection</button>
+        <button onclick="testAuthState()">2️⃣ Check Auth State</button>
+        <button onclick="testCollections()">3️⃣ Test All Collections</button>
+        <button onclick="writeTestData()">4️⃣ Write Test Data</button>
+        <button onclick="readTestData()">5️⃣ Read Test Data</button>
+        <button onclick="clearLog()">🗑️ Clear Log</button>
+
+        <div class="section">
+            <h3>Test Single Collection</h3>
+            <input type="text" id="collectionName" placeholder="Collection name (e.g. emp_prefs)" value="emp_prefs">
+            <button onclick="testSingleCollection()">Test Collection</button>
+        </div>
+
+        <div class="section">
+            <h3>Write Test Document</h3>
+            <input type="text" id="testDocId" placeholder="Document ID (e.g. test-emp-1)" value="test-emp-1">
+            <input type="text" id="testFieldName" placeholder="Field name (e.g. name)" value="testName">
+            <input type="text" id="testFieldValue" placeholder="Field value" value="Test Value">
+            <button onclick="writeTestDoc()">Write Test Doc</button>
+        </div>
+
+        <div class="log" id="logOutput"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js';
+        import { getFirestore, collection, getDocs, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js';
+        import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDDdXRwvYxps4zPEEyOH3RVHfLlzKC2jwk",
+            authDomain: "csc-bd-30c56.firebaseapp.com",
+            projectId: "csc-bd-30c56",
+            storageBucket: "csc-bd-30c56.firebasestorage.app",
+            messagingSenderId: "853953200317",
+            appId: "1:853953200317:web:4834ccddbd0a8cfe5ff7d4"
+        };
+
+        window.log = function(type, message) {
+            const logEl = document.getElementById('logOutput');
+            const timestamp = new Date().toLocaleTimeString();
+            let className = 'info';
+            if (type === 'error') className = 'error';
+            if (type === 'success') className = 'success';
+            logEl.innerHTML += `<span class="${className}">[${timestamp}] ${type.toUpperCase()}: ${message}</span>\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        };
+
+        window.clearLog = function() {
+            document.getElementById('logOutput').innerHTML = '';
+        };
+
+        // Initialize Firebase
+        window.log('info', '🔄 Initializing Firebase...');
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        window.log('success', '✅ Firebase initialized');
+        window.log('info', `Project: ${firebaseConfig.projectId}`);
+
+        // Enable offline persistence
+        try {
+            db.enablePersistence().catch((err) => {
+                if (err.code === 'failed-precondition') {
+                    window.log('info', 'Multiple tabs open, offline persistence disabled');
+                } else {
+                    window.log('warn', 'Offline persistence not available: ' + err.message);
+                }
+            });
+        } catch (e) {
+            window.log('info', 'Offline persistence not available');
+        }
+
+        window.testBasicConnection = async function() {
+            window.log('info', '🔍 Testing basic connection...');
+            try {
+                const snap = await getDocs(collection(db, 'emp_prefs'));
+                window.log('success', `✅ Connection OK! Found ${snap.size} documents in emp_prefs`);
+            } catch (err) {
+                window.log('error', `❌ Connection failed: ${err.code || err.message}`);
+            }
+        };
+
+        window.testAuthState = async function() {
+            window.log('info', '🔍 Checking auth state...');
+            window.log('info', `Current user: ${auth.currentUser ? auth.currentUser.uid : 'None'}`);
+            
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    window.log('success', `✅ Auth OK! UID: ${user.uid}`);
+                } else {
+                    window.log('info', 'No authenticated user, signing in anonymously...');
+                    signInAnonymously(auth)
+                        .then((result) => {
+                            window.log('success', `✅ Signed in! UID: ${result.user.uid}`);
+                        })
+                        .catch((err) => {
+                            window.log('error', `❌ Sign-in failed: ${err.message}`);
+                        });
+                }
+            }, (err) => {
+                window.log('error', `❌ Auth error: ${err.message}`);
+            });
+        };
+
+        window.testCollections = async function() {
+            window.log('info', '🔍 Testing all collections...');
+            const collections = [
+                'employee_notes', 'shift_notes', 'employee_rules', 'shifts',
+                'shift_edits', 'emp_notes', 'emp_rules', 'emp_prefs', 'user_links'
+            ];
+
+            for (const colName of collections) {
+                try {
+                    const snap = await getDocs(collection(db, colName));
+                    window.log('success', `✅ ${colName}: ${snap.size} docs`);
+                } catch (err) {
+                    window.log('error', `❌ ${colName}: ${err.code || err.message}`);
+                }
+            }
+            window.log('success', '✨ Collection test completed!');
+        };
+
+        window.testSingleCollection = async function() {
+            const colName = document.getElementById('collectionName').value;
+            if (!colName) {
+                window.log('error', 'Please enter a collection name');
+                return;
+            }
+            window.log('info', `🔍 Testing collection: ${colName}...`);
+            try {
+                const snap = await getDocs(collection(db, colName));
+                window.log('success', `✅ ${colName}: ${snap.size} documents`);
+                snap.docs.forEach((doc, idx) => {
+                    window.log('info', `  Doc ${idx + 1}: ${doc.id}`);
+                });
+            } catch (err) {
+                window.log('error', `❌ Error: ${err.code} - ${err.message}`);
+            }
+        };
+
+        window.writeTestData = async function() {
+            window.log('info', '✍️ Writing test data...');
+            try {
+                const testRef = doc(db, 'test_collection', 'test_doc');
+                await setDoc(testRef, {
+                    message: 'Hello Firebase!',
+                    timestamp: serverTimestamp(),
+                    testValue: Math.random()
+                });
+                window.log('success', '✅ Test document written successfully!');
+            } catch (err) {
+                window.log('error', `❌ Write failed: ${err.code || err.message}`);
+            }
+        };
+
+        window.readTestData = async function() {
+            window.log('info', '📖 Reading test data...');
+            try {
+                const snap = await getDocs(collection(db, 'test_collection'));
+                window.log('success', `✅ Found ${snap.size} test documents`);
+                snap.docs.forEach((doc, idx) => {
+                    window.log('info', `  ${idx + 1}. ${doc.id}: ${JSON.stringify(doc.data())}`);
+                });
+            } catch (err) {
+                window.log('error', `❌ Read failed: ${err.code || err.message}`);
+            }
+        };
+
+        window.writeTestDoc = async function() {
+            const docId = document.getElementById('testDocId').value;
+            const fieldName = document.getElementById('testFieldName').value;
+            const fieldValue = document.getElementById('testFieldValue').value;
+
+            if (!docId || !fieldName || !fieldValue) {
+                window.log('error', 'Please fill in all fields');
+                return;
+            }
+
+            window.log('info', `✍️ Writing document: ${docId}...`);
+            try {
+                const testRef = doc(db, 'test_docs', docId);
+                await setDoc(testRef, {
+                    [fieldName]: fieldValue,
+                    timestamp: serverTimestamp()
+                }, { merge: true });
+                window.log('success', `✅ Document '${docId}' written successfully!`);
+            } catch (err) {
+                window.log('error', `❌ Write failed: ${err.code || err.message}`);
+            }
+        };
+
+        // Expose db and auth to global for manual testing
+        window.db = db;
+        window.auth = auth;
+        window.firebase_api = { collection, getDocs, doc, setDoc, serverTimestamp };
+
+        window.log('success', '✨ Firebase test suite loaded! Try clicking buttons above.');
+    </script>
+</body>
+</html>

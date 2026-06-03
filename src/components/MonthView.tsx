@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScheduleData, ShiftEntry, Employee, ShiftType, SHIFT_CONFIG, DEPARTMENT_CONFIG, Department, getDepartment } from '../types/schedule';
 import { getShiftEdit } from '../utils/adminEdits';
 import { useTheme } from '../context/ThemeContext';
@@ -34,83 +34,42 @@ function formatTimeRange(start?: string, end?: string) {
 
 type DaySegment = { label: string; color: string; dept: Department };
 
-const SHIFT_TIMES: Record<ShiftType, { start: string; end: string; short: string } | null> = {
-  daily:    { start: '09:00', end: '09:00', short: '09-09' },
-  day:      { start: '09:00', end: '20:00', short: '09-20' },
-  night:    { start: '20:00', end: '09:00', short: '20-09' },
-  off:      null,
-  vacation: null,
-  sick:     null,
-};
-
 function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: ShiftEntry[]): DaySegment[] {
-  const entries = shifts.filter(s => s.employeeId === emp.id && s.date === dateStr);
-  
-  if (!entries.length) return [];
+  const entry = shifts.find(s => s.employeeId === emp.id && s.date === dateStr);
+  if (!entry) return [];
 
-  // Если есть shiftsWithTimes - не показываем на календаре
-  if (entries.some(e => e.shiftsWithTimes?.length)) {
-    return [];
+  const baseRole = entry.role || emp.role;
+  const deptBase = getDepartment(baseRole) ?? emp.department ?? 'kitchen';
+
+  const edit = getShiftEdit(emp.id, dateStr);
+  if (edit?.customStart && edit?.customEnd) {
+    const label = formatTimeRange(edit.customStart, edit.customEnd);
+    const color = DEPARTMENT_CONFIG[deptBase].color;
+    return label ? [{ label, color, dept: deptBase }] : [];
   }
 
-  const segments: DaySegment[] = [];
-  
-  for (const entry of entries) {
-    const baseRole = entry.role || emp.role;
-    const deptBase = getDepartment(baseRole) ?? emp.department ?? 'kitchen';
-    const shift = entry.shift;
-
-    // Если есть multipleShifts с информацией о типах смен (shift field)
-    // показываем временные диапазоны для каждой смены
-    if (entry.multipleShifts?.some(ms => ms.shift)) {
-      for (const ms of entry.multipleShifts) {
-        if (ms.shift) {
-          const times = SHIFT_TIMES[ms.shift];
-          if (times?.short) {
-            segments.push({
-              label: times.short,
-              color: DEPARTMENT_CONFIG[ms.dept].color,
-              dept: ms.dept
-            });
-          }
-        }
-      }
-    }
-    // Если есть multipleShifts с часами (3Б 2К)
-    else if (entry.multipleShifts?.some(ms => ms.hours > 0)) {
-      for (const ms of entry.multipleShifts) {
-        if (ms.hours > 0) {
-          segments.push({
-            label: `${ms.hours}ч`,
-            color: DEPARTMENT_CONFIG[ms.dept].color,
-            dept: ms.dept
-          });
-        }
-      }
-    }
-    // Если есть часы для одной роли
-    else if (entry.hours && entry.hours > 0) {
-      segments.push({
-        label: `${entry.hours}ч`,
-        color: DEPARTMENT_CONFIG[deptBase].color,
-        dept: deptBase
-      });
-    }
-    // Обычная смена - показываем время
-    else if (shift && shift !== 'off' && shift !== 'vacation' && shift !== 'sick') {
-      const times = SHIFT_TIMES[shift];
-      if (times?.short) {
-        segments.push({
-          label: times.short,
-          color: DEPARTMENT_CONFIG[deptBase].color,
-          dept: deptBase
-        });
-      }
-    }
+  if (entry.shiftsWithTimes && entry.shiftsWithTimes.length > 0) {
+    return entry.shiftsWithTimes.map(swt => {
+      const dept = swt.dept;
+      const label = formatTimeRange(swt.startTime, swt.endTime);
+      return { label, color: DEPARTMENT_CONFIG[dept].color, dept };
+    }).filter(s => s.label);
   }
-  
 
-  return segments;
+  if (entry.multipleShifts && entry.multipleShifts.length > 0) {
+    return entry.multipleShifts.map(ms => {
+      const roleForDept = emp.roles?.find(r => getDepartment(r) === ms.dept) || baseRole;
+      const label = `${ms.hours}ч`;
+      return { label, color: DEPARTMENT_CONFIG[ms.dept].color, dept: ms.dept };
+    });
+  }
+
+  if (typeof entry.hours === 'number' && entry.hours > 0) {
+    const label = `${entry.hours}ч`;
+    return [{ label, color: DEPARTMENT_CONFIG[deptBase].color, dept: deptBase }];
+  }
+
+  return [];
 }
 
 const DAY_LABELS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -179,73 +138,42 @@ interface DayModalProps {
 const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClose }) => {
   const { isDark } = useTheme();
   const dateStr = formatDate(year, month, day);
-  
-  console.log(`🔵 [MonthView DayModal] РЕНДЕР: ${dateStr}, shifts=${data.shifts.length}`);
-  
-  useEffect(() => {
-    // Firebase listeners setup
-  }, [dateStr, data.shifts.length]);
 
   // Собираем всех кто работает
   const working: { name: string; role: string; color: string; shift: ShiftType; dept: Department | null; customStart?: string; customEnd?: string }[] = [];
   const absent:  { name: string; role: string; color: string; shift: ShiftType }[] = [];
 
   data.employees.forEach(emp => {
-    // Ищем ВСЕ записи для этого сотрудника в эту дату (может быть несколько должностей)
-    const entries = data.shifts.filter(s => s.employeeId === emp.id && s.date === dateStr);
+    const entry = data.shifts.find(s => s.employeeId === emp.id && s.date === dateStr);
+    const shift: ShiftType = entry?.shift ?? 'off';
+    const role = entry?.role || emp.role;
     
-    if (!entries.length) return;
-
-    for (const entry of entries) {
-      const shift: ShiftType = entry?.shift ?? 'off';
-      const role = entry?.role || emp.role;
-      
-      // Пропускаем только если нет ни смены, ни часов (multipleShifts)
-      if (shift === 'off' && !entry?.hours && !entry?.multipleShifts) continue;
-      
-      const dept = getDepartment(role) ?? emp.department ?? null;
-      // Получаем админские часы
-      const custom = getShiftEdit(emp.id, dateStr);
-      const customStart = custom?.customStart;
-      const customEnd = custom?.customEnd;
-      
-      if (shift === 'vacation' || shift === 'sick') {
-        absent.push({ name: emp.name, role, color: emp.color, shift });
+    // Пропускаем только если нет ни смены, ни часов (multipleShifts)
+    if (shift === 'off' && !entry?.hours && !entry?.multipleShifts) return;
+    const dept = getDepartment(role) ?? emp.department ?? null;
+    // Получаем админские часы
+    const custom = getShiftEdit(emp.id, dateStr);
+    const customStart = custom?.customStart;
+    const customEnd = custom?.customEnd;
+    if (shift === 'vacation' || shift === 'sick') {
+      absent.push({ name: emp.name, role, color: emp.color, shift });
+    } else {
+      // Если есть multipleShifts, добавляем сотрудника для каждого отдела
+      if (entry?.multipleShifts && entry.multipleShifts.length > 1) {
+        // Для каждого отдела в multipleShifts добавляем отдельную запись
+        entry.multipleShifts.forEach(ms => {
+          working.push({ 
+            name: emp.name, 
+            role, 
+            color: emp.color, 
+            shift, 
+            dept: ms.dept as Department, 
+            customStart, 
+            customEnd 
+          });
+        });
       } else {
-        // Если есть multipleShifts - это может быть:
-        // 1. Две разные смены типов (День+Ночь, без часов) - ms.shift будет определен
-        // 2. Несколько смен с часами (3Б 2К) - ms.hours будет > 0
-        if (entry?.multipleShifts && entry.multipleShifts.length > 0) {
-          // Просто разворачиваем каждый shift из multipleShifts
-          for (const ms of entry.multipleShifts) {
-            // Если есть shift field - это комбо смен типов (день+ночь)
-            if (ms.shift) {
-              working.push({ 
-                name: emp.name, 
-                role: ms.role || role,
-                color: emp.color, 
-                shift: ms.shift, 
-                dept: ms.dept as Department, 
-                customStart, 
-                customEnd 
-              });
-            }
-            // Если есть hours > 0 - это смена с часами (3Б 2К)
-            else if (ms.hours > 0) {
-              working.push({ 
-                name: emp.name, 
-                role: ms.role || role,
-                color: emp.color, 
-                shift: 'daily',  // Используем daily как базовую для часовых смен
-                dept: ms.dept as Department, 
-                customStart, 
-                customEnd 
-              });
-            }
-          }
-        } else {
-          working.push({ name: emp.name, role, color: emp.color, shift, dept, customStart, customEnd });
-        }
+        working.push({ name: emp.name, role, color: emp.color, shift, dept, customStart, customEnd });
       }
     }
   });
@@ -438,11 +366,9 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
 
   const getShiftsForDay = (day: number): ShiftType[] => {
     const dateStr = formatDate(year, month, day);
-    const result = data.shifts
+    return data.shifts
       .filter(s => s.date === dateStr && s.shift !== 'off')
       .map(s => s.shift);
-    if (result.length > 0) console.log(`[getShiftsForDay] ${dateStr}: ${result.length} shifts`, result);
-    return result;
   };
 
   const getMyShift = (day: number): ShiftType | null => {
@@ -524,29 +450,17 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
             const myShift   = getMyShift(day);
             const isMyShift = myShift !== null && myShift !== 'off';
 
-            const linkedEmp = linkedEmpId ? data.employees.find(e => e.id === linkedEmpId) ?? null : null;
-            const mySegments = linkedEmp ? getDaySegmentsForEmployee(linkedEmp, dateStr, data.shifts) : [];
+  const linkedEmp = linkedEmpId ? data.employees.find(e => e.id === linkedEmpId) ?? null : null;
+  const mySegments = linkedEmp ? getDaySegmentsForEmployee(linkedEmp, dateStr, data.shifts) : [];
 
-            // Получаем сегменты для всех сотрудников на этот день
-            let allTimeSegments: { label: string; color: string }[] = [];
-            if (!linkedEmp && hasShifts) {
-              console.log(`[MonthView] Собираю сегменты для дня ${dateStr}`);
-              const uniqueSegments = new Map<string, { label: string; color: string }>();
-              // Собираем сегменты от каждого сотрудника на эту дату
-              data.employees.forEach(emp => {
-                const segments = getDaySegmentsForEmployee(emp, dateStr, data.shifts);
-                if (segments.length > 0) {
-                  console.log(`[MonthView] ${emp.name} на ${dateStr}: ${segments.length} segments`, segments);
-                  segments.forEach(seg => {
-                    const key = `${seg.label}|${seg.dept}`;
-                    if (!uniqueSegments.has(key)) {
-                      uniqueSegments.set(key, seg);
-                    }
-                  });
-                }
-              });
-              allTimeSegments = Array.from(uniqueSegments.values());
-              console.log(`[MonthView] Итого для ${dateStr}: ${allTimeSegments.length} сегментов`, allTimeSegments);
+  // Проверяем, есть ли у кого-то custom часы на этот день (для общего календаря)
+  let customHours = null;
+  if (!linkedEmp && hasShifts) {
+              if (custom) {
+                const s = custom.customStart ? custom.customStart.slice(0, 2) : '';
+                const e = custom.customEnd ? custom.customEnd.slice(0, 2) : '';
+                customHours = `${s}${s && e ? '–' : ''}${e}`;
+              }
             }
 
             return (
@@ -596,23 +510,10 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
                     )}
                   </div>
                 ) : (
-                  allTimeSegments.length > 0 && (
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-wrap justify-center gap-1 mt-0.5">
-                      {allTimeSegments.slice(0, 3).map((seg, idx) => (
-                        <span
-                          key={idx}
-                          className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full"
-                          style={{ backgroundColor: seg.color + '22', color: seg.color, border: `1px solid ${seg.color}40` }}
-                        >
-                          {seg.label}
-                        </span>
-                      ))}
-                      {allTimeSegments.length > 3 && (
-                        <span className={`text-[8px] font-semibold px-1.5 py-0.5 rounded-full ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-200 text-slate-700'}`}>
-                          +{allTimeSegments.length - 3}
-                        </span>
-                      )}
-                    </div>
+                  customHours && (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[9px] font-semibold text-amber-600 bg-amber-50 rounded px-1.5 mt-0.5">
+                      {customHours}
+                    </span>
                   )
                 )}
               </button>
