@@ -401,13 +401,15 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
     if (shift === 'vacation' || shift === 'sick') {
       absent.push({ emp, name: emp.name, role, color, shift, isMe, hours, multipleShifts });
     } else if (shiftsWithTimes && shiftsWithTimes.length > 0) {
-      // Если есть смены с временем, добавляем отдельную запись для каждой
+      // Если в ячейке указаны конкретные тайм-диапазоны (например "Бармен 09-20"),
+      // создаём отдельную запись для каждого диапазона чтобы показать их как плашки времени.
       for (const swt of shiftsWithTimes) {
         const deptCfg = DEPARTMENT_CONFIG[swt.dept];
+        const roleForShift = swt.role || emp.roles?.find(r => getDepartment(r) === swt.dept) || role;
         working.push({
           emp,
           name: emp.name,
-          role: swt.role,
+          role: roleForShift,
           color: deptCfg.color,
           shift: 'off',
           dept: swt.dept,
