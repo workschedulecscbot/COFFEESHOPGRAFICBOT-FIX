@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { ScheduleData, ShiftEntry, Employee, ShiftType, SHIFT_CONFIG, DEPARTMENT_CONFIG, Department, getDepartment } from '../types/schedule';
 import { getShiftEdit } from '../utils/adminEdits';
 import { useTheme } from '../context/ThemeContext';
@@ -187,7 +187,9 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
   const { isDark } = useTheme();
   const dateStr = formatDate(year, month, day);
   
-  alert(`DayModal открыт для ${dateStr}`);
+  useEffect(() => {
+    alert(`✅ DayModal렌더됨: ${dateStr}, shifts=${data.shifts.length}`);
+  }, [dateStr, data.shifts.length]);
 
   // Собираем всех кто работает
   const working: { name: string; role: string; color: string; shift: ShiftType; dept: Department | null; customStart?: string; customEnd?: string }[] = [];
