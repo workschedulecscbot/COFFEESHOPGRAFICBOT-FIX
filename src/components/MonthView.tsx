@@ -186,6 +186,8 @@ interface DayModalProps {
 const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClose }) => {
   const { isDark } = useTheme();
   const dateStr = formatDate(year, month, day);
+  
+  console.log('[DayModal] RENDER START - dateStr:', dateStr, 'employees:', data.employees?.length, 'shifts:', data.shifts?.length);
 
   // Собираем всех кто работает
   const working: { name: string; role: string; color: string; shift: ShiftType; dept: Department | null; customStart?: string; customEnd?: string }[] = [];
