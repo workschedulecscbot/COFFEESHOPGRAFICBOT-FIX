@@ -372,11 +372,15 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
           // Объединяем в multipleShifts
           const existingDept = getDepartment(existing.role ?? emp.role) ?? emp.department ?? 'kitchen';
           
+          console.log(`[parseGoogleSheetsCSV] Объединяю смены для ${emp.name} на ${isoDate}: ${existing.shift} + ${shift}`);
+          
           // Создаём массив с обеими сменами
           const combined: Array<{ dept: 'bar' | 'kitchen' | 'hall' | 'power' | 'bar_manager'; hours: number; shift: ShiftType; role?: string }> = [
             { dept: existingDept, hours: 0, shift: existing.shift, role: existing.role },
             { dept: deptForRow, hours: 0, shift, role: roleCell }
           ];
+          
+          console.log(`[parseGoogleSheetsCSV] Результат multipleShifts:`, combined);
           
           // Обновляем запись
           shifts[existingIdx] = {
@@ -406,6 +410,10 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
   void dataStartCol;
 
   const employees: Employee[] = Array.from(employeeMap.values());
+
+  // Логирование multipleShifts
+  const withMS = shifts.filter(s => s.multipleShifts && s.multipleShifts.length > 0);
+  console.log(`[parseGoogleSheetsCSV] Найдено ${withMS.length} смен с multipleShifts:`, withMS.slice(0, 3));
 
   return {
     employees,
