@@ -44,7 +44,11 @@ const SHIFT_TIMES: Record<ShiftType, { start: string; end: string; short: string
 };
 
 function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: ShiftEntry[]): DaySegment[] {
+  console.log(`[getDaySegmentsForEmployee] ВЫЗОВ: ${emp.name} ${dateStr}, всего shifts: ${shifts.length}`);
+  
   const entries = shifts.filter(s => s.employeeId === emp.id && s.date === dateStr);
+  console.log(`[getDaySegmentsForEmployee] entries для ${emp.name}: ${entries.length}`, entries);
+  
   if (!entries.length) return [];
 
   // Если есть shiftsWithTimes - не показываем на календаре
@@ -432,9 +436,11 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
 
   const getShiftsForDay = (day: number): ShiftType[] => {
     const dateStr = formatDate(year, month, day);
-    return data.shifts
+    const result = data.shifts
       .filter(s => s.date === dateStr && s.shift !== 'off')
       .map(s => s.shift);
+    if (result.length > 0) console.log(`[getShiftsForDay] ${dateStr}: ${result.length} shifts`, result);
+    return result;
   };
 
   const getMyShift = (day: number): ShiftType | null => {
@@ -522,18 +528,23 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
             // Получаем сегменты для всех сотрудников на этот день
             let allTimeSegments: { label: string; color: string }[] = [];
             if (!linkedEmp && hasShifts) {
+              console.log(`[MonthView] Собираю сегменты для дня ${dateStr}`);
               const uniqueSegments = new Map<string, { label: string; color: string }>();
               // Собираем сегменты от каждого сотрудника на эту дату
               data.employees.forEach(emp => {
                 const segments = getDaySegmentsForEmployee(emp, dateStr, data.shifts);
-                segments.forEach(seg => {
-                  const key = `${seg.label}|${seg.dept}`;
-                  if (!uniqueSegments.has(key)) {
-                    uniqueSegments.set(key, seg);
-                  }
-                });
+                if (segments.length > 0) {
+                  console.log(`[MonthView] ${emp.name} на ${dateStr}: ${segments.length} segments`, segments);
+                  segments.forEach(seg => {
+                    const key = `${seg.label}|${seg.dept}`;
+                    if (!uniqueSegments.has(key)) {
+                      uniqueSegments.set(key, seg);
+                    }
+                  });
+                }
               });
               allTimeSegments = Array.from(uniqueSegments.values());
+              console.log(`[MonthView] Итого для ${dateStr}: ${allTimeSegments.length} сегментов`, allTimeSegments);
             }
 
             return (
