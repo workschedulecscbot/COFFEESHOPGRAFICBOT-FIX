@@ -400,22 +400,6 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
     
     if (shift === 'vacation' || shift === 'sick') {
       absent.push({ emp, name: emp.name, role, color, shift, isMe, hours, multipleShifts });
-    } else if (shiftsWithTimes && shiftsWithTimes.length > 0) {
-      // Если есть смены с временем, добавляем отдельную запись для каждой
-      for (const swt of shiftsWithTimes) {
-        const deptCfg = DEPARTMENT_CONFIG[swt.dept];
-        working.push({
-          emp,
-          name: emp.name,
-          role: swt.role,
-          color: deptCfg.color,
-          shift: 'off',
-          dept: swt.dept,
-          isMe,
-          startTime: swt.startTime,
-          endTime: swt.endTime,
-        });
-      }
     } else if (multipleShifts && multipleShifts.length > 0) {
       // Если есть несколько смен по часам, добавляем отдельную запись для каждой
       for (const ms of multipleShifts) {

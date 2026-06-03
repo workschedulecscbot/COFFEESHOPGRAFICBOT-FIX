@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScheduleData, ShiftType, SHIFT_CONFIG } from '../types/schedule';
+import { ScheduleData, ShiftType, SHIFT_CONFIG, DEPARTMENT_CONFIG, getDepartment } from '../types/schedule';
 import { Avatar } from './Avatar';
 import { useTheme } from '../context/ThemeContext';
 
@@ -43,8 +43,10 @@ export const WeekView: React.FC<WeekViewProps> = ({ data, weekStart }) => {
 
   const countWorking = (date: string) =>
     data.employees.filter(emp => {
-      const s = getShift(emp.id, date);
-      return s !== 'off';
+      const entry = data.shifts.find(s => s.employeeId === emp.id && s.date === date);
+      const shift = entry?.shift ?? 'off';
+      const hasHours = entry?.multipleShifts && entry.multipleShifts.length > 0;
+      return shift !== 'off' || hasHours;
     }).length;
 
   const rowBg = isDark
@@ -124,19 +126,44 @@ export const WeekView: React.FC<WeekViewProps> = ({ data, weekStart }) => {
             {days.map(day => {
               const dateStr = formatDate(day);
               const isToday = dateStr === today;
-              const shift = getShift(emp.id, dateStr);
+              const entry = data.shifts.find(s => s.employeeId === emp.id && s.date === dateStr);
+              const shift = entry?.shift ?? 'off';
               const cfg = SHIFT_CONFIG[shift];
               const cellBg = CELL_BG[shift];
+
+              // Проверяем наличие multipleShifts с часами (только если есть часы)
+              const hasMultipleShifts = entry?.multipleShifts && entry.multipleShifts.length > 0;
 
               return (
                 <div
                   key={dateStr}
                   className={`flex-1 flex items-center justify-center rounded-xl py-1.5 min-w-0 transition-all
                     ${isToday ? 'ring-2 ring-indigo-400 ring-offset-1' : ''}
-                    ${shift === 'off' ? '' : cellBg}`}
+                    ${shift === 'off' && !hasMultipleShifts ? '' : hasMultipleShifts ? 'bg-slate-300/20' : cellBg}`}
                 >
-                  {shift === 'off' ? (
+                  {shift === 'off' && !hasMultipleShifts ? (
                     <span className={`text-[11px] font-bold ${isDark ? 'text-slate-700' : 'text-gray-200'}`}>—</span>
+                  ) : hasMultipleShifts ? (
+                    <div className="flex flex-col gap-1 items-center">
+                      {entry?.multipleShifts?.slice(0, 2).map((ms, i) => {
+                        const color = DEPARTMENT_CONFIG[ms.dept].color;
+                        const label = `${ms.hours}ч`;
+                        return (
+                          <span
+                            key={i}
+                            className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                            style={{ backgroundColor: color + '22', color, border: `1px solid ${color}40` }}
+                          >
+                            {label}
+                          </span>
+                        );
+                      })}
+                      {entry?.multipleShifts && entry.multipleShifts.length > 2 && (
+                        <span className={`text-[8px] font-semibold ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                          +{entry.multipleShifts.length - 2}
+                        </span>
+                      )}
+                    </div>
                   ) : (
                     <div className="flex flex-col items-center leading-none">
                       <span className="text-[10px]">{cfg.icon}</span>

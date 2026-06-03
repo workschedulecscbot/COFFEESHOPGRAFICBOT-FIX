@@ -49,11 +49,8 @@ function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: Shift
   }
 
   if (entry.shiftsWithTimes && entry.shiftsWithTimes.length > 0) {
-    return entry.shiftsWithTimes.map(swt => {
-      const dept = swt.dept;
-      const label = formatTimeRange(swt.startTime, swt.endTime);
-      return { label, color: DEPARTMENT_CONFIG[dept].color, dept };
-    }).filter(s => s.label);
+    // shiftsWithTimes без часов - не показываем, это информация о смене без проставленных часов
+    return [];
   }
 
   if (entry.multipleShifts && entry.multipleShifts.length > 0) {
@@ -450,17 +447,28 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
             const myShift   = getMyShift(day);
             const isMyShift = myShift !== null && myShift !== 'off';
 
-  const linkedEmp = linkedEmpId ? data.employees.find(e => e.id === linkedEmpId) ?? null : null;
-  const mySegments = linkedEmp ? getDaySegmentsForEmployee(linkedEmp, dateStr, data.shifts) : [];
+            const linkedEmp = linkedEmpId ? data.employees.find(e => e.id === linkedEmpId) ?? null : null;
+            const mySegments = linkedEmp ? getDaySegmentsForEmployee(linkedEmp, dateStr, data.shifts) : [];
 
-  // Проверяем, есть ли у кого-то custom часы на этот день (для общего календаря)
-  let customHours = null;
-  if (!linkedEmp && hasShifts) {
-              if (custom) {
-                const s = custom.customStart ? custom.customStart.slice(0, 2) : '';
-                const e = custom.customEnd ? custom.customEnd.slice(0, 2) : '';
-                customHours = `${s}${s && e ? '–' : ''}${e}`;
-              }
+            // Получаем все сегменты со временем для всех сотрудников (только если есть часы в multipleShifts)
+            let allTimeSegments: { label: string; color: string }[] = [];
+            if (!linkedEmp && hasShifts) {
+              const uniqueSegments = new Map<string, { label: string; color: string }>();
+              data.shifts
+                .filter(s => s.date === dateStr && s.multipleShifts && s.multipleShifts.length > 0)
+                .forEach(entry => {
+                  entry.multipleShifts?.forEach(ms => {
+                    const label = `${ms.hours}ч`;
+                    const key = `${label}|${ms.dept}`;
+                    if (!uniqueSegments.has(key)) {
+                      uniqueSegments.set(key, {
+                        label,
+                        color: DEPARTMENT_CONFIG[ms.dept].color,
+                      });
+                    }
+                  });
+                });
+              allTimeSegments = Array.from(uniqueSegments.values());
             }
 
             return (
@@ -510,10 +518,23 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
                     )}
                   </div>
                 ) : (
-                  customHours && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-[9px] font-semibold text-amber-600 bg-amber-50 rounded px-1.5 mt-0.5">
-                      {customHours}
-                    </span>
+                  allTimeSegments.length > 0 && (
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-wrap justify-center gap-1 mt-0.5">
+                      {allTimeSegments.slice(0, 3).map((seg, idx) => (
+                        <span
+                          key={idx}
+                          className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full"
+                          style={{ backgroundColor: seg.color + '22', color: seg.color, border: `1px solid ${seg.color}40` }}
+                        >
+                          {seg.label}
+                        </span>
+                      ))}
+                      {allTimeSegments.length > 3 && (
+                        <span className={`text-[8px] font-semibold px-1.5 py-0.5 rounded-full ${isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-200 text-slate-700'}`}>
+                          +{allTimeSegments.length - 3}
+                        </span>
+                      )}
+                    </div>
                   )
                 )}
               </button>

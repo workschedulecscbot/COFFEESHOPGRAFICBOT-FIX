@@ -301,11 +301,10 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
 
       // Обработка существующей записи смены для этого сотрудника в эту дату
       // Логика приоритета:
-      // 1. shiftsWithTimes - полная информация о смене(ах) с временем (="Роль ЧЧ-ЧЧ Роль2 ЧЧ-ЧЧ")
-      // 2. multipleShifts - несколько смен (например, "3Б 2К" = 3 часа бармен, 2 часа кухня)
+      // 1. shiftsWithTimes - полная информация о смене(ах) с временем (="Роль ЧЧ-ЧЧ Роль2 ЧЧ-ЧЧ") - только если явно указано в ячейке
+      // 2. multipleShifts - несколько смен с часами (например, "3Б 2К" = 3 часа бармен, 2 часа кухня)
       // 3. hours - числовые часы для одной роли
       // 4. shift !== 'off' && existing.shift === 'off' - замена off на рабочую смену
-      // 5. shift !== 'off' && existing.shift !== 'off' - две разные рабочие смены, объединить в shiftsWithTimes
       if (existingIdx !== -1) {
         const existing = shifts[existingIdx];
         const deptForRow = getDepartment(roleCell) ?? emp.department ?? 'kitchen';
@@ -338,49 +337,6 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
         } else if (shift !== 'off' && existing.shift === 'off') {
           // Новая информация — рабочая смена, прежняя была off
           shifts[existingIdx] = { employeeId: emp!.id, date: isoDate, shift, role: roleCell || undefined };
-        } else if (shift !== 'off' && existing.shift !== 'off') {
-          // Две разные рабочие смены в один день — объединяем в shiftsWithTimes с временем начала-конца
-          const SHIFT_TIMES: Record<ShiftType, { start: string; end: string } | null> = {
-            daily:    { start: '09:00', end: '09:00' },
-            day:      { start: '09:00', end: '20:00' },
-            night:    { start: '20:00', end: '09:00' },
-            off:      null,
-            vacation: null,
-            sick:     null,
-          };
-          
-          const shiftsWithTimesArray: Array<{ role: string; dept: 'bar' | 'kitchen' | 'hall' | 'power' | 'bar_manager'; startTime: string; endTime: string }> = [];
-          
-          // Добавляем существующую смену
-          const existingDept = getDepartment(existing.role ?? emp.role) ?? 'kitchen';
-          const existingTimes = SHIFT_TIMES[existing.shift];
-          if (existingTimes) {
-            shiftsWithTimesArray.push({
-              role: existing.role || '',
-              dept: existingDept,
-              startTime: existingTimes.start,
-              endTime: existingTimes.end,
-            });
-          }
-          
-          // Добавляем новую смену
-          const newTimes = SHIFT_TIMES[shift];
-          if (newTimes) {
-            shiftsWithTimesArray.push({
-              role: roleCell || '',
-              dept: deptForRow,
-              startTime: newTimes.start,
-              endTime: newTimes.end,
-            });
-          }
-          
-          shifts[existingIdx] = {
-            employeeId: emp!.id,
-            date: isoDate,
-            shift: 'off',
-            shiftsWithTimes: shiftsWithTimesArray,
-            role: undefined,
-          };
         }
       } else {
         const deptForRow = getDepartment(roleCell) ?? emp.department ?? 'kitchen';
