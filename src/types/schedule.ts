@@ -188,6 +188,7 @@ export interface MultipleShift {
   dept: Department;
   hours: number;
   role?: string;  // роль для этого отдела (например, "Повар" для kitchen)
+  shift?: ShiftType;  // тип смены (day, night и т.д.) для комбинированных смен
 }
 
 export interface ShiftWithTime {

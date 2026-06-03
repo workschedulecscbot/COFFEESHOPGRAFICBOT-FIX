@@ -53,7 +53,14 @@ function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: Shift
     return [];
   }
 
+  // Проверяем multipleShifts - они могут быть либо с часами, либо с информацией о разных сменах
   if (entry.multipleShifts && entry.multipleShifts.length > 0) {
+    // Если есть multipleShifts с информацией о сменах (shift field) - это комбо двух смен
+    if (entry.multipleShifts.some(ms => ms.shift)) {
+      // Это комбинированные смены (День + Ночь и т.д.) - не показываем на календаре с часами
+      return [];
+    }
+    // Это multipleShifts с часами - показываем все
     return entry.multipleShifts.map(ms => {
       const roleForDept = emp.roles?.find(r => getDepartment(r) === ms.dept) || baseRole;
       const label = `${ms.hours}ч`;
@@ -155,15 +162,15 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
     if (shift === 'vacation' || shift === 'sick') {
       absent.push({ name: emp.name, role, color: emp.color, shift });
     } else {
-      // Если есть multipleShifts, добавляем сотрудника для каждого отдела
-      if (entry?.multipleShifts && entry.multipleShifts.length > 1) {
-        // Для каждого отдела в multipleShifts добавляем отдельную запись
+      // Если есть multipleShifts с комбинированными сменами (разные типы)
+      if (entry?.multipleShifts && entry.multipleShifts.length > 0 && entry.multipleShifts.some(ms => ms.shift)) {
+        // Для каждой смены в multipleShifts добавляем отдельную запись
         entry.multipleShifts.forEach(ms => {
           working.push({ 
             name: emp.name, 
-            role, 
+            role: ms.role || role, 
             color: emp.color, 
-            shift, 
+            shift: ms.shift || shift, 
             dept: ms.dept as Department, 
             customStart, 
             customEnd 
