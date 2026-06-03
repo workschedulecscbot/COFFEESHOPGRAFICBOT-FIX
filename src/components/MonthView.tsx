@@ -34,46 +34,81 @@ function formatTimeRange(start?: string, end?: string) {
 
 type DaySegment = { label: string; color: string; dept: Department };
 
+const SHIFT_TIMES: Record<ShiftType, { start: string; end: string; short: string } | null> = {
+  daily:    { start: '09:00', end: '09:00', short: '09-09' },
+  day:      { start: '09:00', end: '20:00', short: '09-20' },
+  night:    { start: '20:00', end: '09:00', short: '20-09' },
+  off:      null,
+  vacation: null,
+  sick:     null,
+};
+
 function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: ShiftEntry[]): DaySegment[] {
-  const entry = shifts.find(s => s.employeeId === emp.id && s.date === dateStr);
-  if (!entry) return [];
+  const entries = shifts.filter(s => s.employeeId === emp.id && s.date === dateStr);
+  if (!entries.length) return [];
 
-  const baseRole = entry.role || emp.role;
-  const deptBase = getDepartment(baseRole) ?? emp.department ?? 'kitchen';
-
-  const edit = getShiftEdit(emp.id, dateStr);
-  if (edit?.customStart && edit?.customEnd) {
-    const label = formatTimeRange(edit.customStart, edit.customEnd);
-    const color = DEPARTMENT_CONFIG[deptBase].color;
-    return label ? [{ label, color, dept: deptBase }] : [];
-  }
-
-  if (entry.shiftsWithTimes && entry.shiftsWithTimes.length > 0) {
-    // shiftsWithTimes без часов - не показываем, это информация о смене без проставленных часов
+  // Если есть shiftsWithTimes - не показываем на календаре
+  if (entries.some(e => e.shiftsWithTimes?.length)) {
     return [];
   }
 
-  // Проверяем multipleShifts - они могут быть либо с часами, либо с информацией о разных сменах
-  if (entry.multipleShifts && entry.multipleShifts.length > 0) {
-    // Если есть multipleShifts с информацией о сменах (shift field и hours = 0) - это комбо двух смен типов
-    if (entry.multipleShifts.some(ms => ms.shift && ms.hours === 0)) {
-      // Это комбинированные смены (День + Ночь и т.д.) - не показываем на календаре с часами
-      return [];
+  const segments: DaySegment[] = [];
+  
+  for (const entry of entries) {
+    const baseRole = entry.role || emp.role;
+    const deptBase = getDepartment(baseRole) ?? emp.department ?? 'kitchen';
+    const shift = entry.shift;
+
+    // Если есть multipleShifts с информацией о типах смен (shift field)
+    // показываем временные диапазоны для каждой смены
+    if (entry.multipleShifts?.some(ms => ms.shift)) {
+      for (const ms of entry.multipleShifts) {
+        if (ms.shift) {
+          const times = SHIFT_TIMES[ms.shift];
+          if (times?.short) {
+            segments.push({
+              label: times.short,
+              color: DEPARTMENT_CONFIG[ms.dept].color,
+              dept: ms.dept
+            });
+          }
+        }
+      }
     }
-    // Это multipleShifts с часами - показываем все
-    return entry.multipleShifts.map(ms => {
-      const roleForDept = emp.roles?.find(r => getDepartment(r) === ms.dept) || baseRole;
-      const label = `${ms.hours}ч`;
-      return { label, color: DEPARTMENT_CONFIG[ms.dept].color, dept: ms.dept };
-    });
+    // Если есть multipleShifts с часами (3Б 2К)
+    else if (entry.multipleShifts?.some(ms => ms.hours > 0)) {
+      for (const ms of entry.multipleShifts) {
+        if (ms.hours > 0) {
+          segments.push({
+            label: `${ms.hours}ч`,
+            color: DEPARTMENT_CONFIG[ms.dept].color,
+            dept: ms.dept
+          });
+        }
+      }
+    }
+    // Если есть часы для одной роли
+    else if (entry.hours && entry.hours > 0) {
+      segments.push({
+        label: `${entry.hours}ч`,
+        color: DEPARTMENT_CONFIG[deptBase].color,
+        dept: deptBase
+      });
+    }
+    // Обычная смена - показываем время
+    else if (shift && shift !== 'off' && shift !== 'vacation' && shift !== 'sick') {
+      const times = SHIFT_TIMES[shift];
+      if (times?.short) {
+        segments.push({
+          label: times.short,
+          color: DEPARTMENT_CONFIG[deptBase].color,
+          dept: deptBase
+        });
+      }
+    }
   }
 
-  if (typeof entry.hours === 'number' && entry.hours > 0) {
-    const label = `${entry.hours}ч`;
-    return [{ label, color: DEPARTMENT_CONFIG[deptBase].color, dept: deptBase }];
-  }
-
-  return [];
+  return segments;
 }
 
 const DAY_LABELS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -148,47 +183,54 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
   const absent:  { name: string; role: string; color: string; shift: ShiftType }[] = [];
 
   data.employees.forEach(emp => {
-    const entry = data.shifts.find(s => s.employeeId === emp.id && s.date === dateStr);
-    const shift: ShiftType = entry?.shift ?? 'off';
-    const role = entry?.role || emp.role;
-    
-    // Пропускаем только если нет ни смены, ни часов (multipleShifts)
-    if (shift === 'off' && !entry?.hours && !entry?.multipleShifts) return;
-    const dept = getDepartment(role) ?? emp.department ?? null;
-    // Получаем админские часы
-    const custom = getShiftEdit(emp.id, dateStr);
-    const customStart = custom?.customStart;
-    const customEnd = custom?.customEnd;
-    if (shift === 'vacation' || shift === 'sick') {
-      absent.push({ name: emp.name, role, color: emp.color, shift });
-    } else {
-      // Если есть multipleShifts - это может быть:
-      // 1. Две разные смены типов (День+Ночь, без часов) - ms.shift будет определен
-      // 2. Несколько смен с часами (3Б 2К) - ms.hours будет > 0
-      if (entry?.multipleShifts && entry.multipleShifts.length > 0) {
-        // Проверяем есть ли у них часы или это комбо типов смен
-        const hasHours = entry.multipleShifts.some(ms => ms.hours > 0);
-        if (!hasHours) {
-          // Это комбо типов смен - добавляем каждую как отдельную запись
-          entry.multipleShifts.forEach(ms => {
-            if (ms.shift) {
-              working.push({ 
-                name: emp.name, 
-                role: ms.role || role,  // используем роль из multipleShift если есть
-                color: emp.color, 
-                shift: ms.shift, 
-                dept: ms.dept as Department, 
-                customStart, 
-                customEnd 
-              });
-            }
-          });
+    // Ищем ВСЕ записи для этого сотрудника в эту дату (может быть несколько должностей)
+    const entries = data.shifts.filter(s => s.employeeId === emp.id && s.date === dateStr);
+    if (!entries.length) return;
+
+    for (const entry of entries) {
+      const shift: ShiftType = entry?.shift ?? 'off';
+      const role = entry?.role || emp.role;
+      
+      // Пропускаем только если нет ни смены, ни часов (multipleShifts)
+      if (shift === 'off' && !entry?.hours && !entry?.multipleShifts) continue;
+      
+      const dept = getDepartment(role) ?? emp.department ?? null;
+      // Получаем админские часы
+      const custom = getShiftEdit(emp.id, dateStr);
+      const customStart = custom?.customStart;
+      const customEnd = custom?.customEnd;
+      
+      if (shift === 'vacation' || shift === 'sick') {
+        absent.push({ name: emp.name, role, color: emp.color, shift });
+      } else {
+        // Если есть multipleShifts - это может быть:
+        // 1. Две разные смены типов (День+Ночь, без часов) - ms.shift будет определен
+        // 2. Несколько смен с часами (3Б 2К) - ms.hours будет > 0
+        if (entry?.multipleShifts && entry.multipleShifts.length > 0) {
+          // Проверяем есть ли у них часы или это комбо типов смен
+          const hasHours = entry.multipleShifts.some(ms => ms.hours > 0);
+          if (!hasHours) {
+            // Это комбо типов смен - добавляем каждую как отдельную запись
+            entry.multipleShifts.forEach(ms => {
+              if (ms.shift) {
+                working.push({ 
+                  name: emp.name, 
+                  role: ms.role || role,  // используем роль из multipleShift если есть
+                  color: emp.color, 
+                  shift: ms.shift, 
+                  dept: ms.dept as Department, 
+                  customStart, 
+                  customEnd 
+                });
+              }
+            });
+          } else {
+            // Это смены с часами - добавляем как одну запись
+            working.push({ name: emp.name, role, color: emp.color, shift, dept, customStart, customEnd });
+          }
         } else {
-          // Это смены с часами - добавляем как одну запись
           working.push({ name: emp.name, role, color: emp.color, shift, dept, customStart, customEnd });
         }
-      } else {
-        working.push({ name: emp.name, role, color: emp.color, shift, dept, customStart, customEnd });
       }
     }
   });

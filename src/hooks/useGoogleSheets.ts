@@ -17,6 +17,16 @@ const HEADER_WORDS = new Set([
   'вылеты', 'пассажиров', 'рейсов',
 ]);
 
+// Нормализует имя сотрудника для сравнения
+function normalizeName(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[\s\u00A0\u2000-\u200F]+/g, ' ')  // Все виды пробелов -> обычный пробел
+    .replace(/\s*[,;.].*$/, '')                 // Удаляем комментарии после запятой/точки
+    .trim();
+}
+
 function isEmployeeName(cell: string): boolean {
   const val = cell.trim();
   if (!val) return false;
@@ -278,8 +288,8 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
     if (!isRoleCell(roleCell)) continue;
     if (!isEmployeeName(nameCell)) continue;
 
-    // Нормализуем имя: приводим к нижнему регистру, удаляем лишние пробелы
-    const nameLower = nameCell.toLowerCase().trim().replace(/\s+/g, ' ');
+    // Нормализуем имя для поиска по сотрудникам
+    const nameLower = normalizeName(nameCell);
     let emp = employeeMap.get(nameLower);
 
     if (!emp) {
