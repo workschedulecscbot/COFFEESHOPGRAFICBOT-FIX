@@ -58,10 +58,13 @@ function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: Shift
     const baseRole = entry.role || emp.role;
     const deptBase = getDepartment(baseRole) ?? emp.department ?? 'kitchen';
     const shift = entry.shift;
+    
+    console.log(`[getDaySegmentsForEmployee] ${emp.name} ${dateStr}: shift=${shift}, has ms=${!!entry.multipleShifts}, ms=${entry.multipleShifts}`);
 
     // Если есть multipleShifts с информацией о типах смен (shift field)
     // показываем временные диапазоны для каждой смены
     if (entry.multipleShifts?.some(ms => ms.shift)) {
+      console.log(`[getDaySegmentsForEmployee] Обнаружены multipleShifts с shift для ${emp.name}`);
       for (const ms of entry.multipleShifts) {
         if (ms.shift) {
           const times = SHIFT_TIMES[ms.shift];
@@ -107,6 +110,8 @@ function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: Shift
       }
     }
   }
+  
+  if (segments.length > 0) console.log(`[getDaySegmentsForEmployee] ${emp.name} ${dateStr}: segments=`, segments);
 
   return segments;
 }
@@ -514,24 +519,20 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
             const linkedEmp = linkedEmpId ? data.employees.find(e => e.id === linkedEmpId) ?? null : null;
             const mySegments = linkedEmp ? getDaySegmentsForEmployee(linkedEmp, dateStr, data.shifts) : [];
 
-            // Получаем все сегменты со временем для всех сотрудников (только если есть часы в multipleShifts)
+            // Получаем сегменты для всех сотрудников на этот день
             let allTimeSegments: { label: string; color: string }[] = [];
             if (!linkedEmp && hasShifts) {
               const uniqueSegments = new Map<string, { label: string; color: string }>();
-              data.shifts
-                .filter(s => s.date === dateStr && s.multipleShifts && s.multipleShifts.length > 0)
-                .forEach(entry => {
-                  entry.multipleShifts?.forEach(ms => {
-                    const label = `${ms.hours}ч`;
-                    const key = `${label}|${ms.dept}`;
-                    if (!uniqueSegments.has(key)) {
-                      uniqueSegments.set(key, {
-                        label,
-                        color: DEPARTMENT_CONFIG[ms.dept].color,
-                      });
-                    }
-                  });
+              // Собираем сегменты от каждого сотрудника на эту дату
+              data.employees.forEach(emp => {
+                const segments = getDaySegmentsForEmployee(emp, dateStr, data.shifts);
+                segments.forEach(seg => {
+                  const key = `${seg.label}|${seg.dept}`;
+                  if (!uniqueSegments.has(key)) {
+                    uniqueSegments.set(key, seg);
+                  }
                 });
+              });
               allTimeSegments = Array.from(uniqueSegments.values());
             }
 
