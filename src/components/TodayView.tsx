@@ -77,10 +77,12 @@ function buildDayData(data: ScheduleData, date: Date): DayData {
       absent.push({ empId: emp.id, name: emp.name, role, color: emp.color, shift });
     } else if (allShifts.length > 1) {
       // *** ИСПРАВЛЕНИЕ БАГА: Если несколько разных типов смен (напр., дневная и ночная) ***
-      // Создаём отдельную запись для КАЖДОГО типа смены
+      // Создаём отдельную запись для КАЖДОГО типа смены с правильным отделом
       for (const shiftType of allShifts) {
         if (shiftType !== 'off' && shiftType !== 'vacation' && shiftType !== 'sick') {
-          working.push({ empId: emp.id, name: emp.name, role, color: emp.color, shift: shiftType, department });
+          const shiftRole = entry?.shiftRoles?.[shiftType] || role;
+          const shiftDept = getDepartment(shiftRole) ?? department;
+          working.push({ empId: emp.id, name: emp.name, role: shiftRole, color: emp.color, shift: shiftType, department: shiftDept });
         }
       }
     } else {

@@ -439,11 +439,12 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
       }
     } else if (allShifts.length > 1) {
       // *** ИСПРАВЛЕНИЕ БАГА: Если несколько разных типов смен (напр., дневная и ночная) ***
-      // Создаём отдельную запись для КАЖДОГО типа смены, чтобы сотрудник
-      // отображался под каждой группой смен в DayModal
+      // Создаём отдельную запись для КАЖДОГО типа смены, используя правильный отдел для каждой
       for (const shiftType of allShifts) {
         if (shiftType !== 'off') {
-          working.push({ emp, name: emp.name, role, color, shift: shiftType, dept, isMe, hours });
+          const shiftRole = entry?.shiftRoles?.[shiftType] || role;
+          const shiftDept = getDepartment(shiftRole) ?? dept;
+          working.push({ emp, name: emp.name, role: shiftRole, color, shift: shiftType, dept: shiftDept, isMe, hours });
         }
       }
     } else {

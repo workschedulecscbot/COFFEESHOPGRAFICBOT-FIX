@@ -335,11 +335,23 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
           shifts[existingIdx] = { employeeId: emp!.id, date: isoDate, shift, role: roleCell || undefined };
         } else if (shift !== 'off' && existing.shift !== 'off' && shift !== existing.shift) {
           // *** ИСПРАВЛЕНИЕ БАГА: Обе смены реальные и разные (напр., дневная и ночная) ***
-          // Накапливаем оба типа смен в массив shifts[]
+          // Накапливаем оба типа смен в массив shifts[] и отслеживаем роль для каждой смены
           const existingShifts = existing.shifts || [existing.shift];
+          const existingRoles = existing.shiftRoles || {};
+          
+          // Записываем роль существующей смены
+          if (!existingRoles[existing.shift]) {
+            existingRoles[existing.shift] = existing.role || emp.role;
+          }
+          
+          // Добавляем новую смену
           if (!existingShifts.includes(shift)) {
             existingShifts.push(shift);
           }
+          
+          // Записываем роль новой смены
+          existingRoles[shift] = roleCell || emp.role;
+          
           // Сохраняем доминирующую смену как основную для обратной совместимости
           const allShifts = existingShifts;
           const SHIFT_PRIORITY: ShiftType[] = ['sick','vacation','daily','day','night','off'];
@@ -354,6 +366,7 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
             ...existing,
             shift: dominant,
             shifts: allShifts,
+            shiftRoles: existingRoles,
           };
         }
       } else {

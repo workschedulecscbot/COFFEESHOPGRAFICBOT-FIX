@@ -201,15 +201,17 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
         });
       } else if (allShifts.length > 1) {
         // *** ИСПРАВЛЕНИЕ БАГА: Если несколько разных типов смен (напр., дневная и ночная) ***
-        // Создаём отдельную запись для КАЖДОГО типа смены
+        // Создаём отдельную запись для КАЖДОГО типа смены с правильным отделом
         for (const shiftType of allShifts) {
           if (shiftType !== 'off') {
+            const shiftRole = entry?.shiftRoles?.[shiftType] || role;
+            const shiftDept = getDepartment(shiftRole) ?? dept;
             working.push({
               name: emp.name,
-              role,
+              role: shiftRole,
               color: emp.color,
               shift: shiftType,
-              dept,
+              dept: shiftDept,
               customStart,
               customEnd,
             });
