@@ -333,6 +333,28 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
         } else if (shift !== 'off' && existing.shift === 'off') {
           // Новая информация — рабочая смена, прежняя была off
           shifts[existingIdx] = { employeeId: emp!.id, date: isoDate, shift, role: roleCell || undefined };
+        } else if (shift !== 'off' && existing.shift !== 'off' && shift !== existing.shift) {
+          // *** ИСПРАВЛЕНИЕ БАГА: Обе смены реальные и разные (напр., дневная и ночная) ***
+          // Накапливаем оба типа смен в массив shifts[]
+          const existingShifts = existing.shifts || [existing.shift];
+          if (!existingShifts.includes(shift)) {
+            existingShifts.push(shift);
+          }
+          // Сохраняем доминирующую смену как основную для обратной совместимости
+          const allShifts = existingShifts;
+          const SHIFT_PRIORITY: ShiftType[] = ['sick','vacation','daily','day','night','off'];
+          let dominant = 'off' as ShiftType;
+          for (const s of SHIFT_PRIORITY) {
+            if (allShifts.includes(s)) {
+              dominant = s;
+              break;
+            }
+          }
+          shifts[existingIdx] = {
+            ...existing,
+            shift: dominant,
+            shifts: allShifts,
+          };
         }
       } else {
         const deptForRow = getDepartment(roleCell) ?? emp.department ?? 'kitchen';

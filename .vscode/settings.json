@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^Get-Content \"c:\\\\Users\\\\silay\\\\\\.vscode\\\\extensions\\\\hidenobunagai\\.nvidia-nim-provider-0\\.2\\.1\\\\package\\.json\" \\| ConvertFrom-Json \\| Select-Object -Property name, version, description \\| Format-List$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

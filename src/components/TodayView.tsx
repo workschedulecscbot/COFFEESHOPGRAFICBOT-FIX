@@ -67,13 +67,22 @@ function buildDayData(data: ScheduleData, date: Date): DayData {
   data.employees.forEach(emp => {
     const entry = data.shifts.find(s => s.employeeId === emp.id && s.date === dateStr);
     const shift: ShiftType = entry?.shift ?? 'off';
+    const allShifts = entry?.shifts || (shift !== 'off' ? [shift] : []);
     const role = entry?.role || emp.role;
     const department = getDepartment(role) ?? emp.department ?? null;
 
-    if (shift === 'off') return;
+    if (shift === 'off' && allShifts.length === 0) return;
 
     if (shift === 'vacation' || shift === 'sick') {
       absent.push({ empId: emp.id, name: emp.name, role, color: emp.color, shift });
+    } else if (allShifts.length > 1) {
+      // *** ИСПРАВЛЕНИЕ БАГА: Если несколько разных типов смен (напр., дневная и ночная) ***
+      // Создаём отдельную запись для КАЖДОГО типа смены
+      for (const shiftType of allShifts) {
+        if (shiftType !== 'off' && shiftType !== 'vacation' && shiftType !== 'sick') {
+          working.push({ empId: emp.id, name: emp.name, role, color: emp.color, shift: shiftType, department });
+        }
+      }
     } else {
       working.push({ empId: emp.id, name: emp.name, role, color: emp.color, shift, department });
     }

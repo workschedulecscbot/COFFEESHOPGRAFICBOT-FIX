@@ -157,10 +157,11 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
   data.employees.forEach(emp => {
     const entry = data.shifts.find(s => s.employeeId === emp.id && s.date === dateStr);
     const shift: ShiftType = entry?.shift ?? 'off';
+    const allShifts = entry?.shifts || (shift !== 'off' ? [shift] : []);
     const role = entry?.role || emp.role;
     
     // Пропускаем только если нет ни смены, ни часов (multipleShifts)
-    if (shift === 'off' && !entry?.hours && !entry?.multipleShifts) return;
+    if (shift === 'off' && !entry?.hours && !entry?.multipleShifts && allShifts.length === 0) return;
     const dept = getDepartment(role) ?? emp.department ?? null;
     // Получаем админские часы
     const custom = getShiftEdit(emp.id, dateStr);
@@ -198,6 +199,22 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
             customEnd 
           });
         });
+      } else if (allShifts.length > 1) {
+        // *** ИСПРАВЛЕНИЕ БАГА: Если несколько разных типов смен (напр., дневная и ночная) ***
+        // Создаём отдельную запись для КАЖДОГО типа смены
+        for (const shiftType of allShifts) {
+          if (shiftType !== 'off') {
+            working.push({
+              name: emp.name,
+              role,
+              color: emp.color,
+              shift: shiftType,
+              dept,
+              customStart,
+              customEnd,
+            });
+          }
+        }
       } else {
         working.push({ name: emp.name, role, color: emp.color, shift, dept, customStart, customEnd });
       }
@@ -395,11 +412,18 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
     const res: ShiftType[] = [];
     data.shifts.forEach(s => {
       if (s.date !== dateStr) return;
-      if (s.shift && s.shift !== 'off') res.push(s.shift);
+      // *** ИСПРАВЛЕНИЕ БАГА: Если есть массив shifts, используем его вместо одной смены ***
+      if (s.shifts && s.shifts.length > 0) {
+        s.shifts.forEach(st => {
+          if (st && st !== 'off' && !res.includes(st)) res.push(st);
+        });
+      } else if (s.shift && s.shift !== 'off') {
+        res.push(s.shift);
+      }
       if (s.shiftsWithTimes && s.shiftsWithTimes.length > 0) {
         s.shiftsWithTimes.forEach(swt => {
           const inferred = inferShiftTypeFromTimeRange(swt.startTime, swt.endTime);
-          if (inferred && inferred !== 'off') res.push(inferred);
+          if (inferred && inferred !== 'off' && !res.includes(inferred)) res.push(inferred);
         });
       }
     });
@@ -411,6 +435,12 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
     const dateStr = formatDate(year, month, day);
     const entry = data.shifts.find(s => s.employeeId === linkedEmpId && s.date === dateStr);
     if (!entry) return null;
+    // *** ИСПРАВЛЕНИЕ БАГА: Если есть массив shifts, используем первый (доминирующий) ***
+    if (entry.shifts && entry.shifts.length > 0) {
+      for (const st of entry.shifts) {
+        if (st && st !== 'off') return st;
+      }
+    }
     if (entry.shift && entry.shift !== 'off') return entry.shift;
     if (entry.shiftsWithTimes && entry.shiftsWithTimes.length > 0) {
       const swt = entry.shiftsWithTimes[0];

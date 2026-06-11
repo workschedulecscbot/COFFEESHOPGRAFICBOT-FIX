@@ -201,6 +201,7 @@ export interface ShiftEntry {
   employeeId: string;
   date: string;       // ISO yyyy-mm-dd
   shift: ShiftType;
+  shifts?: ShiftType[];  // массив всех типов смен на день (для сотрудников с несколькими смен, например дневная и ночная)
   role?: string;      // должность на конкретный день (если отличается от основной)
   hours?: number;     // необязательное поле — количество часов, если в таблице указано число
   multipleShifts?: MultipleShift[];  // несколько смен в день с часами (например, 3ч бар + 2ч кухня)

@@ -391,9 +391,10 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
     const hours = entry?.hours;
     const multipleShifts = entry?.multipleShifts;
     const shiftsWithTimes = entry?.shiftsWithTimes;
+    const allShifts = entry?.shifts || (shift !== 'off' ? [shift] : []);
     const role = entry?.role || emp.role;
     // Если нет смены и нет отработанных часов — пропускаем
-    if (shift === 'off' && !hours && !multipleShifts && !shiftsWithTimes) return;
+    if (shift === 'off' && !hours && !multipleShifts && !shiftsWithTimes && allShifts.length === 0) return;
     const color = getDeptColorByRole(role, emp.color);
     const dept = getDepartment(role) ?? emp.department ?? 'kitchen';
     const isMe = emp.id === linkedEmpId;
@@ -435,6 +436,15 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
           isMe,
           hours: ms.hours,
         });
+      }
+    } else if (allShifts.length > 1) {
+      // *** ИСПРАВЛЕНИЕ БАГА: Если несколько разных типов смен (напр., дневная и ночная) ***
+      // Создаём отдельную запись для КАЖДОГО типа смены, чтобы сотрудник
+      // отображался под каждой группой смен в DayModal
+      for (const shiftType of allShifts) {
+        if (shiftType !== 'off') {
+          working.push({ emp, name: emp.name, role, color, shift: shiftType, dept, isMe, hours });
+        }
       }
     } else {
       working.push({ emp, name: emp.name, role, color, shift, dept, isMe, hours });

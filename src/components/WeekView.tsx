@@ -41,6 +41,14 @@ export const WeekView: React.FC<WeekViewProps> = ({ data, weekStart }) => {
     return entry?.shift ?? 'off';
   };
 
+  // *** ИСПРАВЛЕНИЕ БАГА: Функция для получения всех смен на день ***
+  const getShifts = (empId: string, date: string): ShiftType[] => {
+    const entry = data.shifts.find(s => s.employeeId === empId && s.date === date);
+    if (!entry) return ['off'];
+    if (entry.shifts && entry.shifts.length > 0) return entry.shifts;
+    return [entry.shift ?? 'off'];
+  };
+
   const countWorking = (date: string) =>
     data.employees.filter(emp => {
       const s = getShift(emp.id, date);
@@ -124,9 +132,11 @@ export const WeekView: React.FC<WeekViewProps> = ({ data, weekStart }) => {
             {days.map(day => {
               const dateStr = formatDate(day);
               const isToday = dateStr === today;
-              const shift = getShift(emp.id, dateStr);
+              const shifts = getShifts(emp.id, dateStr);
+              const shift = shifts[0];
               const cfg = SHIFT_CONFIG[shift];
               const cellBg = CELL_BG[shift];
+              const hasMultipleShifts = shifts.length > 1 && shifts.some(s => s !== 'off');
 
               return (
                 <div
@@ -142,6 +152,8 @@ export const WeekView: React.FC<WeekViewProps> = ({ data, weekStart }) => {
                       <span className="text-[10px]">{cfg.icon}</span>
                       <span className={`text-[10px] font-extrabold ${shift === 'night' ? 'text-indigo-200' : 'text-white'}`}>
                         {cfg.shortLabel}
+                        {/* *** ИСПРАВЛЕНИЕ БАГА: Показываем индикатор если есть ещё смены *** */}
+                        {hasMultipleShifts && <span className="text-[8px] opacity-70">+</span>}
                       </span>
                     </div>
                   )}
