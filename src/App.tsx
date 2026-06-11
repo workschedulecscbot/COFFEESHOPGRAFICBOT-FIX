@@ -5,7 +5,7 @@ import { useDemoData, parseGoogleSheetsCSV, fetchSheetList, fetchSheetListWithAp
 import { ScheduleData, Employee } from './types/schedule';
 import { getTgUserId } from './utils/telegram';
 
-const ADMIN_TG_IDS = [783948887, 6147055724];
+const ADMIN_TG_IDS = [6147055724, 783948887, 554036504, 1097870836, 5280806376, 5127811182, 8012023597];
 import { getEmpPrefs, getLinkedEmpId, saveLinkedEmpId, cacheEmpPrefs } from './utils/adminEdits';
 import { watchEmpPrefs } from './utils/firebase';
 import { ThemeProvider, useTheme } from './context/ThemeContext';

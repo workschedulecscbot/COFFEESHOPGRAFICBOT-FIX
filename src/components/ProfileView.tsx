@@ -18,7 +18,7 @@ const DEPT_ORDER: Department[] = ['bar_manager', 'power', 'bar', 'hall', 'kitche
 const STORAGE_TG_NAME     = 'sf_tg_name';
 const STORAGE_FRIENDS_IDS = 'sf_friends_ids';
 
-const ADMIN_TG_IDS: number[] = [783948887, 6147055724];
+const ADMIN_TG_IDS: number[] = [6147055724, 783948887, 554036504, 1097870836, 5280806376, 5127811182, 8012023597];
 
 type ProfileSection = 'reports' | 'staff' | 'settings' | 'bugreport';
 
