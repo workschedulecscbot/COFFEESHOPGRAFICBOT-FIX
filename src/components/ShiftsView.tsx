@@ -1127,6 +1127,9 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
             const myDeptColor = myRole ? getDeptColorByRole(myRole, '#6366f1') : '#6366f1';
             const isMyWorking = !!myHours || myShift === 'daily' || myShift === 'day' || myShift === 'night' || (myEntry?.multipleShifts && myEntry.multipleShifts.length > 0);
 
+            // *** ИСПРАВЛЕНИЕ БАГА: Получаем все смены (включая двойные типы смен) ***
+            const myAllShifts = myEntry?.shifts || (myShift !== 'off' ? [myShift] : []);
+
             // Кастомное время для моей смены
             const myCustom    = linkedEmp ? getShiftEditFromFirebase(linkedEmp.id, dateStr) : null;
             
@@ -1176,10 +1179,12 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
                 hours: cHours,
                 multipleShifts: cMultipleShifts,
                 shiftsWithTimes: cShiftsWithTimes,
+                allShifts: cEntry?.shifts || (cShift !== 'off' ? [cShift] : []),
+                shiftRoles: cEntry?.shiftRoles,
                 customStart: cCustom?.customStart,
                 customEnd: cCustom?.customEnd,
               };
-            }).filter((c): c is NonNullable<typeof c> => c !== null && (c.shift !== 'off' || !!c.hours || !!c.multipleShifts || !!c.shiftsWithTimes));
+            }).filter((c): c is NonNullable<typeof c> => c !== null && (c.shift !== 'off' || !!c.hours || !!c.multipleShifts || !!c.shiftsWithTimes || c.allShifts.length > 1));
 
             const hasColleague = colleagueShifts.length > 0;
             const hasAnyShift  = allShifts.length > 0;
@@ -1234,6 +1239,25 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
                               </div>
                             );
                           })
+                        ) : myAllShifts.length > 1 && !myMultipleShifts ? (
+                          // *** ИСПРАВЛЕНИЕ БАГА: Показываем каждый тип смены отдельно (напр., день на баре + ночь в зале) ***
+                          myAllShifts.map((shiftType, idx) => {
+                            if (shiftType === 'off') return null;
+                            const shiftRole = myEntry?.shiftRoles?.[shiftType] || myRole;
+                            const shiftDept = getDepartment(shiftRole) ?? 'kitchen';
+                            const deptCfg = DEPARTMENT_CONFIG[shiftDept];
+                            const deptIcon = deptCfg?.icon ? `${deptCfg.icon} ` : '';
+                            const shiftCfg = SHIFT_CONFIG[shiftType];
+                            return (
+                              <div
+                                key={idx}
+                                className="w-full text-center text-[8px] font-bold leading-none px-0.5 py-[2px] rounded-[3px]"
+                                style={{ backgroundColor: deptCfg?.color + '40', color: deptCfg?.color }}
+                              >
+                                {deptIcon}{shiftCfg?.short || shiftType}
+                              </div>
+                            );
+                          })
                         ) : (
                           <div
                             className="w-full text-center text-[8px] font-bold leading-none px-0.5 py-[2px] rounded-[3px]"
@@ -1261,19 +1285,43 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
                           })
                         ) : (
                           <>
-                            <div
-                              className="w-full text-center text-[8px] font-bold leading-none px-0.5 py-[2px] rounded-[3px]"
-                              style={{ backgroundColor: myDeptColor + '40', color: myDeptColor }}
-                            >
-                              {myTimeStart}
-                            </div>
-                            {myTimeEnd && (
-                              <div
-                                className="w-full text-center text-[8px] font-bold leading-none px-0.5 py-[2px] rounded-[3px]"
-                                style={{ backgroundColor: myDeptColor + '40', color: myDeptColor }}
-                              >
-                                {myTimeEnd}
-                              </div>
+                            {myAllShifts.length > 1 && !myMultipleShifts ? (
+                              // *** ИСПРАВЛЕНИЕ БАГА: Показываем каждый тип смены отдельно ***
+                              myAllShifts.map((shiftType, idx) => {
+                                if (shiftType === 'off') return null;
+                                const shiftRole = myEntry?.shiftRoles?.[shiftType] || myRole;
+                                const shiftDept = getDepartment(shiftRole) ?? 'kitchen';
+                                const deptCfg = DEPARTMENT_CONFIG[shiftDept];
+                                const deptIcon = deptCfg?.icon ? `${deptCfg.icon} ` : '';
+                                const shiftCfg = SHIFT_CONFIG[shiftType];
+                                const shiftTimes = SHIFT_TIMES[shiftType];
+                                return (
+                                  <div
+                                    key={idx}
+                                    className="w-full text-center text-[8px] font-bold leading-none px-0.5 py-[2px] rounded-[3px]"
+                                    style={{ backgroundColor: deptCfg?.color + '40', color: deptCfg?.color }}
+                                  >
+                                    {deptIcon}{shiftTimes?.short || shiftCfg?.short || shiftType}
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <>
+                                <div
+                                  className="w-full text-center text-[8px] font-bold leading-none px-0.5 py-[2px] rounded-[3px]"
+                                  style={{ backgroundColor: myDeptColor + '40', color: myDeptColor }}
+                                >
+                                  {myTimeStart}
+                                </div>
+                                {myTimeEnd && (
+                                  <div
+                                    className="w-full text-center text-[8px] font-bold leading-none px-0.5 py-[2px] rounded-[3px]"
+                                    style={{ backgroundColor: myDeptColor + '40', color: myDeptColor }}
+                                  >
+                                    {myTimeEnd}
+                                  </div>
+                                )}
+                              </>
                             )}
                           </>
                         )}
@@ -1306,6 +1354,22 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
                                 color: deptCfg?.color || c.color,
                               };
                             });
+                          } else if (c.allShifts && c.allShifts.length > 1 && !c.multipleShifts) {
+                            // *** ИСПРАВЛЕНИЕ БАГА: Показываем каждый тип смены коллеги отдельно ***
+                            items = c.allShifts.map(shiftType => {
+                              if (shiftType === 'off') return null;
+                              const shiftRole = c.shiftRoles?.[shiftType] || c.role;
+                              const shiftDept = getDepartment(shiftRole) ?? c.dept;
+                              const deptCfg = DEPARTMENT_CONFIG[shiftDept];
+                              const deptIcon = deptCfg?.icon ? `${deptCfg.icon} ` : '';
+                              const shiftCfg = SHIFT_CONFIG[shiftType];
+                              const shiftTimes = SHIFT_TIMES[shiftType];
+                              const text = `${deptIcon}${shiftTimes?.short || shiftCfg?.short || shiftType}`;
+                              return {
+                                text,
+                                color: deptCfg?.color || c.color,
+                              };
+                            }).filter((item): item is { text: string; color: string } => item !== null);
                           } else if (c.hours) {
                             items = [{ text: `${deptIcon}${c.hours}ч`, color: c.color }];
                           } else if (timeStart && timeEnd && (c.customStart || c.customEnd)) {
@@ -1358,6 +1422,22 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
                           text: `${deptIcon}${ms.hours}ч`,
                           color: c.color,
                         }));
+                      } else if (c.allShifts && c.allShifts.length > 1 && !c.multipleShifts) {
+                        // *** ИСПРАВЛЕНИЕ БАГА: Показываем каждый тип смены коллеги отдельно ***
+                        items = c.allShifts.map(shiftType => {
+                          if (shiftType === 'off') return null;
+                          const shiftRole = c.shiftRoles?.[shiftType] || c.role;
+                          const shiftDept = getDepartment(shiftRole) ?? c.dept;
+                          const deptCfg = DEPARTMENT_CONFIG[shiftDept];
+                          const deptIcon = deptCfg?.icon ? `${deptCfg.icon} ` : '';
+                          const shiftCfg = SHIFT_CONFIG[shiftType];
+                          const shiftTimes = SHIFT_TIMES[shiftType];
+                          const text = `${deptIcon}${shiftTimes?.short || shiftCfg?.short || shiftType}`;
+                          return {
+                            text,
+                            color: deptCfg?.color || c.color,
+                          };
+                        }).filter((item): item is { text: string; color: string } => item !== null);
                       } else if (c.hours) {
                         items = [{ text: `${deptIcon}${c.hours}ч`, color: c.color }];
                       } else if (timeStart && timeEnd && (c.customStart || c.customEnd)) {
