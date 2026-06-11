@@ -32,6 +32,17 @@ function formatTimeRange(start?: string, end?: string) {
   return `${s}${s && e ? '–' : ''}${e}`;
 }
 
+// Infer coarse shift type from a time range (used when sheet contains explicit ranges like 09:00-20:00)
+function inferShiftTypeFromTimeRange(start?: string, end?: string): ShiftType {
+  if (!start || !end) return 'off';
+  const sh = parseInt(start.slice(0, 2), 10);
+  const eh = parseInt(end.slice(0, 2), 10);
+  if (isNaN(sh) || isNaN(eh)) return 'off';
+  // If range crosses midnight or starts late — treat as night
+  if (sh >= 20 || eh <= 9 || (eh <= sh)) return 'night';
+  return 'day';
+}
+
 type DaySegment = { label: string; color: string; dept: Department };
 
 function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: ShiftEntry[]): DaySegment[] {
@@ -158,8 +169,23 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
     if (shift === 'vacation' || shift === 'sick') {
       absent.push({ name: emp.name, role, color: emp.color, shift });
     } else {
-      // Если есть multipleShifts, добавляем сотрудника для каждого отдела
-      if (entry?.multipleShifts && entry.multipleShifts.length > 1) {
+      // Если в ячейке указаны конкретные тайм-диапазоны (например "Бармен 09-20"),
+      // создаём отдельную запись для каждого диапазона чтобы показать их как плашки времени.
+      if (entry?.shiftsWithTimes && entry.shiftsWithTimes.length > 0) {
+        for (const swt of entry.shiftsWithTimes) {
+          const roleForShift = swt.role || emp.roles?.find(r => getDepartment(r) === swt.dept) || role;
+          const inferredShift = inferShiftTypeFromTimeRange(swt.startTime, swt.endTime);
+          working.push({
+            name: emp.name,
+            role: roleForShift,
+            color: emp.color,
+            shift: inferredShift,
+            dept: swt.dept as Department,
+            customStart: swt.startTime,
+            customEnd: swt.endTime,
+          });
+        }
+      } else if (entry?.multipleShifts && entry.multipleShifts.length > 1) {
         // Для каждого отдела в multipleShifts добавляем отдельную запись
         entry.multipleShifts.forEach(ms => {
           working.push({ 
@@ -366,16 +392,31 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
 
   const getShiftsForDay = (day: number): ShiftType[] => {
     const dateStr = formatDate(year, month, day);
-    return data.shifts
-      .filter(s => s.date === dateStr && s.shift !== 'off')
-      .map(s => s.shift);
+    const res: ShiftType[] = [];
+    data.shifts.forEach(s => {
+      if (s.date !== dateStr) return;
+      if (s.shift && s.shift !== 'off') res.push(s.shift);
+      if (s.shiftsWithTimes && s.shiftsWithTimes.length > 0) {
+        s.shiftsWithTimes.forEach(swt => {
+          const inferred = inferShiftTypeFromTimeRange(swt.startTime, swt.endTime);
+          if (inferred && inferred !== 'off') res.push(inferred);
+        });
+      }
+    });
+    return res;
   };
 
   const getMyShift = (day: number): ShiftType | null => {
     if (!linkedEmpId) return null;
     const dateStr = formatDate(year, month, day);
     const entry = data.shifts.find(s => s.employeeId === linkedEmpId && s.date === dateStr);
-    return entry?.shift ?? 'off';
+    if (!entry) return null;
+    if (entry.shift && entry.shift !== 'off') return entry.shift;
+    if (entry.shiftsWithTimes && entry.shiftsWithTimes.length > 0) {
+      const swt = entry.shiftsWithTimes[0];
+      return inferShiftTypeFromTimeRange(swt.startTime, swt.endTime);
+    }
+    return null;
   };
 
   const calCell = isDark ? CAL_CELL_DARK : CAL_CELL;
@@ -453,15 +494,8 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
   const linkedEmp = linkedEmpId ? data.employees.find(e => e.id === linkedEmpId) ?? null : null;
   const mySegments = linkedEmp ? getDaySegmentsForEmployee(linkedEmp, dateStr, data.shifts) : [];
 
-  // Проверяем, есть ли у кого-то custom часы на этот день (для общего календаря)
-  let customHours = null;
-  if (!linkedEmp && hasShifts) {
-              if (custom) {
-                const s = custom.customStart ? custom.customStart.slice(0, 2) : '';
-                const e = custom.customEnd ? custom.customEnd.slice(0, 2) : '';
-                customHours = `${s}${s && e ? '–' : ''}${e}`;
-              }
-            }
+  // No per-day aggregate custom hours shown for anonymous calendar cells
+  let customHours: string | null = null;
 
             return (
               <button
