@@ -1246,15 +1246,14 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
                             const shiftRole = myEntry?.shiftRoles?.[shiftType] || myRole;
                             const shiftDept = getDepartment(shiftRole) ?? 'kitchen';
                             const deptCfg = DEPARTMENT_CONFIG[shiftDept];
-                            const deptIcon = deptCfg?.icon ? `${deptCfg.icon} ` : '';
-                            const shiftCfg = SHIFT_CONFIG[shiftType];
+                            const shiftTimes = SHIFT_TIMES[shiftType];
                             return (
                               <div
                                 key={idx}
                                 className="w-full text-center text-[8px] font-bold leading-none px-0.5 py-[2px] rounded-[3px]"
                                 style={{ backgroundColor: deptCfg?.color + '40', color: deptCfg?.color }}
                               >
-                                {deptIcon}{shiftCfg?.short || shiftType}
+                                {shiftTimes?.short || shiftType}
                               </div>
                             );
                           })
@@ -1292,8 +1291,6 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
                                 const shiftRole = myEntry?.shiftRoles?.[shiftType] || myRole;
                                 const shiftDept = getDepartment(shiftRole) ?? 'kitchen';
                                 const deptCfg = DEPARTMENT_CONFIG[shiftDept];
-                                const deptIcon = deptCfg?.icon ? `${deptCfg.icon} ` : '';
-                                const shiftCfg = SHIFT_CONFIG[shiftType];
                                 const shiftTimes = SHIFT_TIMES[shiftType];
                                 return (
                                   <div
@@ -1301,7 +1298,7 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
                                     className="w-full text-center text-[8px] font-bold leading-none px-0.5 py-[2px] rounded-[3px]"
                                     style={{ backgroundColor: deptCfg?.color + '40', color: deptCfg?.color }}
                                   >
-                                    {deptIcon}{shiftTimes?.short || shiftCfg?.short || shiftType}
+                                    {shiftTimes?.short || shiftType}
                                   </div>
                                 );
                               })
@@ -1361,10 +1358,8 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
                               const shiftRole = c.shiftRoles?.[shiftType] || c.role;
                               const shiftDept = getDepartment(shiftRole) ?? c.dept;
                               const deptCfg = DEPARTMENT_CONFIG[shiftDept];
-                              const deptIcon = deptCfg?.icon ? `${deptCfg.icon} ` : '';
-                              const shiftCfg = SHIFT_CONFIG[shiftType];
                               const shiftTimes = SHIFT_TIMES[shiftType];
-                              const text = `${deptIcon}${shiftTimes?.short || shiftCfg?.short || shiftType}`;
+                              const text = `${shiftTimes?.short || shiftType}`;
                               return {
                                 text,
                                 color: deptCfg?.color || c.color,
