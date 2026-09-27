@@ -406,13 +406,30 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
     const allShifts = entry?.shifts || (shift !== 'off' ? [shift] : []);
     const role = entry?.role || emp.role;
     // Если нет смены и нет отработанных часов — пропускаем
-    if (shift === 'off' && !hours && !multipleShifts && !shiftsWithTimes && allShifts.length === 0) return;
+    if (shift === 'off' && !hours && !multipleShifts && !shiftsWithTimes && allShifts.length === 0 && !entry?.shiftEntries) return;
     const color = getDeptColorByRole(role, emp.color);
     const dept = getDepartment(role) ?? emp.department ?? 'kitchen';
     const isMe = emp.id === linkedEmpId;
     
     if (shift === 'vacation' || shift === 'sick') {
       absent.push({ emp, name: emp.name, role, color, shift, isMe, hours, multipleShifts });
+    } else if (entry?.shiftEntries && entry.shiftEntries.length > 0) {
+      // ★ ПРИОРИТЕТ 1: shiftEntries — массив ВСЕХ смен включая дубликаты по типу
+      // (напр., две дневных смены на разных должностях). Каждая смена = отдельная запись в нужном отделе.
+      for (const se of entry.shiftEntries) {
+        if (se.shift !== 'off') {
+          working.push({
+            emp,
+            name: emp.name,
+            role: se.role,
+            color: DEPARTMENT_CONFIG[se.dept].color,
+            shift: se.shift,
+            dept: se.dept,
+            isMe,
+            hours,
+          });
+        }
+      }
     } else if (shiftsWithTimes && shiftsWithTimes.length > 0) {
       // Если в ячейке указаны конкретные тайм-диапазоны (например "Бармен 09-20"),
       // создаём отдельную запись для каждого диапазона чтобы показать их как плашки времени.
