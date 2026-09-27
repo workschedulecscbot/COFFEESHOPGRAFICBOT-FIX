@@ -389,10 +389,9 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({
             >
               💬 Отправить
             </button>
-            {/* Убрана кнопка "Полный CRUD тест Firebase" для оптимизации */}
+          </div>
+        </div>
       )}
-            {/* Убрана кнопка "Firestore Index Error Test" для оптимизации */}
-
     </div>
   );
 };
