@@ -710,6 +710,7 @@ interface ShiftEditDoc {
   empId: string;
   date: string;
   shiftType?: string;  // Add shiftType to allow multiple shifts per employee on same day
+  dept?: string;       // Add dept to distinguish multiple shifts of same type on different departments
   customStart?: string;
   customEnd?: string;
   note?: string;
@@ -718,8 +719,11 @@ interface ShiftEditDoc {
 
 export async function setShiftEdit(edit: ShiftEditDoc): Promise<void> {
   try {
-    // Include shiftType in docId to allow multiple shifts per employee on same day
-    const docId = edit.shiftType ? `${edit.empId}_${edit.date}_${edit.shiftType}` : `${edit.empId}_${edit.date}`;
+    // Include shiftType and dept in docId to allow multiple shifts per employee on same day
+    // dept distinguishes shifts of the same type on different departments (e.g., two day shifts: bar + hall)
+    let docId = `${edit.empId}_${edit.date}`;
+    if (edit.shiftType) docId += `_${edit.shiftType}`;
+    if (edit.dept) docId += `_${edit.dept}`;
     const docRef = doc(db, 'shift_edits', docId);
     
     // Build payload - only include defined fields
@@ -730,6 +734,7 @@ export async function setShiftEdit(edit: ShiftEditDoc): Promise<void> {
     };
     
     if (edit.shiftType !== undefined) payload.shiftType = edit.shiftType;
+    if (edit.dept !== undefined) payload.dept = edit.dept;
     if (edit.customStart !== undefined) payload.customStart = edit.customStart;
     if (edit.customEnd !== undefined) payload.customEnd = edit.customEnd;
     if (edit.note !== undefined) payload.note = edit.note;
@@ -742,9 +747,11 @@ export async function setShiftEdit(edit: ShiftEditDoc): Promise<void> {
   }
 }
 
-export async function deleteShiftEditDoc(empId: string, date: string, shiftType?: string): Promise<void> {
+export async function deleteShiftEditDoc(empId: string, date: string, shiftType?: string, dept?: string): Promise<void> {
   try {
-    const docId = shiftType ? `${empId}_${date}_${shiftType}` : `${empId}_${date}`;
+    let docId = `${empId}_${date}`;
+    if (shiftType) docId += `_${shiftType}`;
+    if (dept) docId += `_${dept}`;
     const docRef = doc(db, 'shift_edits', docId);
     await deleteDoc(docRef);
     console.log('[Firebase] Shift edit deleted:', docId);

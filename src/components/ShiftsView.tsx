@@ -107,14 +107,15 @@ interface EditShiftModalProps {
   emp: Employee;
   date: string;
   shift: ShiftType;
+  dept?: string;
   onClose: () => void;
   onSaved: () => void;
   initialEdit?: { customStart?: string; customEnd?: string; note?: string }; // pass existing values from Firebase/local state
 }
-const EditShiftModal: React.FC<EditShiftModalProps> = ({ emp, date, shift, onClose, onSaved, initialEdit }) => {
+const EditShiftModal: React.FC<EditShiftModalProps> = ({ emp, date, shift, dept, onClose, onSaved, initialEdit }) => {
   const { isDark } = useTheme();
   const defaultTimes = SHIFT_TIMES[shift];
-  const existing = getShiftEdit(emp.id, date, shift);
+  const existing = getShiftEdit(emp.id, date, shift, dept);
   const editValues = initialEdit ?? existing;
 
   const [startTime, setStartTime] = useState(editValues?.customStart ?? defaultTimes?.start ?? '08:00');
@@ -134,19 +135,20 @@ const EditShiftModal: React.FC<EditShiftModalProps> = ({ emp, date, shift, onClo
         empId: emp.id,
         date,
         shiftType: shift,
+        dept,
         customStart: startTime,
         customEnd:   endTime,
         note:        note.trim() || undefined,
       });
     } else {
-      deleteShiftEdit(emp.id, date, shift);
+      deleteShiftEdit(emp.id, date, shift, dept);
     }
     onSaved();
     onClose();
   };
 
   const handleReset = () => {
-    deleteShiftEdit(emp.id, date, shift);
+    deleteShiftEdit(emp.id, date, shift, dept);
     onSaved();
     onClose();
   };
@@ -295,8 +297,11 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
       if (!mounted) return;
       const editMap: Record<string, any> = {};
       edits.forEach(edit => {
-        // Include shiftType in key to allow multiple shifts per employee on same day
-        const key = edit.shiftType ? `${edit.empId}-${edit.date}-${edit.shiftType}` : `${edit.empId}-${edit.date}`;
+        // Include shiftType and dept in key to allow multiple shifts per employee on same day
+        // dept distinguishes shifts of the same type on different departments (e.g., two day shifts: bar + hall)
+        let key = `${edit.empId}-${edit.date}`;
+        if (edit.shiftType) key += `-${edit.shiftType}`;
+        if (edit.dept) key += `-${edit.dept}`;
         editMap[key] = edit;
       });
       console.log('[DayModal] Shift edits updated:', editMap);
@@ -340,10 +345,12 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
     };
   }, []);
 
-  const getCustomTimes = (empId: string, dateStr: string, shiftType?: ShiftType) => {
+  const getCustomTimes = (empId: string, dateStr: string, shiftType?: ShiftType, dept?: string) => {
     // Try Firebase first, then localStorage as fallback
-    // Use shiftType in key to allow multiple shifts per employee on same day
-    const key = shiftType ? `${empId}-${dateStr}-${shiftType}` : `${empId}-${dateStr}`;
+    // Use shiftType + dept in key to allow multiple shifts per employee on same day
+    let key = `${empId}-${dateStr}`;
+    if (shiftType) key += `-${shiftType}`;
+    if (dept) key += `-${dept}`;
     const fbEdit = fsShiftEdits[key];
     if (fbEdit) {
       return {
@@ -353,7 +360,7 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
       };
     }
     // Fallback to localStorage
-    const localEdit = getShiftEdit(empId, dateStr);
+    const localEdit = getShiftEdit(empId, dateStr, shiftType, dept);
     return localEdit ? {
       customStart: localEdit.customStart,
       customEnd: localEdit.customEnd,
@@ -369,10 +376,12 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
     
     return fsShiftEdits[empId]?.note ?? '';
   };
-  const getShiftNote = (empId: string, dateStr: string, shiftType?: ShiftType) => {
-    // Try Firebase shift_notes first (stored as { shiftId: "empId-date", text: "..." })
-    // Use shiftType in key to allow multiple shifts per employee on same day
-    const key = shiftType ? `${empId}-${dateStr}-${shiftType}` : `${empId}-${dateStr}`;
+  const getShiftNote = (empId: string, dateStr: string, shiftType?: ShiftType, dept?: string) => {
+    // Try Firebase shift_notes first (stored as { shiftId: "empId-date-shiftType-dept", text: "..." })
+    // Use shiftType + dept in key to allow multiple shifts per employee on same day
+    let key = `${empId}-${dateStr}`;
+    if (shiftType) key += `-${shiftType}`;
+    if (dept) key += `-${dept}`;
     const fbShiftNote = fsShiftNotes[key];
     if (fbShiftNote) return fbShiftNote;
 
@@ -587,9 +596,9 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
                         </div>
                         <div className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-gray-50'}`}>
                           {sg.map((w, i) => {
-                            const custom    = getCustomTimes(w.emp.id, dateStr, w.shift);
+                            const custom    = getCustomTimes(w.emp.id, dateStr, w.shift, w.dept);
                             const empNote   = getNote(w.emp.id);
-                            const shiftNote = getShiftNote(w.emp.id, dateStr, w.shift);
+                            const shiftNote = getShiftNote(w.emp.id, dateStr, w.shift, w.dept);
                             const timeStart = custom?.customStart ?? SHIFT_TIMES[w.shift]?.start;
                             const timeEnd   = custom?.customEnd   ?? SHIFT_TIMES[w.shift]?.end;
                             const hasCustomTime = custom?.customStart || custom?.customEnd;
@@ -640,7 +649,7 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
                                 {/* Карандаш — только для администраторов */}
                                 {isAdmin && (
                                   <button
-                                    onClick={e => { e.stopPropagation(); setEditingShift({ emp: w.emp, shift: w.shift }); }}
+                                    onClick={e => { e.stopPropagation(); setEditingShift({ emp: w.emp, shift: w.shift, dept: w.dept }); }}
                                     className={`w-7 h-7 rounded-full flex items-center justify-center text-sm transition-all active:scale-95 flex-shrink-0 mt-0.5 ${
                                       isDark ? 'bg-slate-700 hover:bg-slate-600 text-slate-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-400'
                                     } ${(empNote || shiftNote || hasCustomTime) ? isDark ? '!bg-amber-900/40 !text-amber-400' : '!bg-amber-100 !text-amber-600' : ''}`}
@@ -665,7 +674,7 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
                       <div className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-gray-50'}`}>
                         {group.filter(w => w.birthday && w.shift === 'off' && !w.hours).map((w, i) => {
                           const empNote = getNote(w.emp.id);
-                          const shiftNote = getShiftNote(w.emp.id, dateStr, w.shift);
+                          const shiftNote = getShiftNote(w.emp.id, dateStr, w.shift, w.dept);
                           return (
                             <div key={i} className={`flex items-start gap-3 px-4 py-2.5 ${w.isMe ? isDark ? 'bg-indigo-900/30' : 'bg-indigo-50' : ''}`}>
                               <div
@@ -697,7 +706,7 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
                               {/* Карандаш — только для администраторов */}
                               {isAdmin && (
                                 <button
-                                  onClick={e => { e.stopPropagation(); setEditingShift({ emp: w.emp, shift: w.shift }); }}
+                                  onClick={e => { e.stopPropagation(); setEditingShift({ emp: w.emp, shift: w.shift, dept: w.dept }); }}
                                   className={`w-7 h-7 rounded-full flex items-center justify-center text-sm transition-all active:scale-95 flex-shrink-0 mt-0.5 ${
                                     isDark ? 'bg-slate-700 hover:bg-slate-600 text-slate-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-400'
                                   } ${(empNote || shiftNote) ? isDark ? '!bg-amber-900/40 !text-amber-400' : '!bg-amber-100 !text-amber-600' : ''}`}
@@ -722,7 +731,7 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
                         {group.filter(w => w.shift === 'off' && (w.hours || w.startTime)).map((w, i) => {
                           const workedHours = w.hours;
                           const empNote = getNote(w.emp.id);
-                          const shiftNote = getShiftNote(w.emp.id, dateStr, w.shift);
+                          const shiftNote = getShiftNote(w.emp.id, dateStr, w.shift, w.dept);
                           const deptCfg = DEPARTMENT_CONFIG[w.dept];
                           const displayTime = w.startTime && w.endTime ? `${w.startTime.slice(0,2)}-${w.endTime.slice(0,2)}` : undefined;
                           return (
@@ -807,7 +816,8 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
           emp={editingShift.emp}
           date={dateStr}
           shift={editingShift.shift}
-          initialEdit={getCustomTimes(editingShift.emp.id, dateStr, editingShift.shift)}
+          dept={editingShift.dept}
+          initialEdit={getCustomTimes(editingShift.emp.id, dateStr, editingShift.shift, editingShift.dept)}
           onClose={() => setEditingShift(null)}
           onSaved={handleSaved}
         />
@@ -1051,15 +1061,17 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
   const linkedEmp = linkedEmpId ? data.employees.find(e => e.id === linkedEmpId) : null;
 
   // Get shift edit from Firebase map first, fallback to localStorage
-  const getShiftEditFromFirebase = (empId: string, dateStr: string, shiftType?: string) => {
-    const key = shiftType ? `${empId}-${dateStr}-${shiftType}` : `${empId}-${dateStr}`;
+  const getShiftEditFromFirebase = (empId: string, dateStr: string, shiftType?: string, dept?: string) => {
+    let key = `${empId}-${dateStr}`;
+    if (shiftType) key += `-${shiftType}`;
+    if (dept) key += `-${dept}`;
     const fbEdit = shiftEditsMap[key];
     if (fbEdit) {
       console.log('[ShiftsView] Retrieved Firebase shift edit for', key, ':', fbEdit);
       return fbEdit;
     }
     // Fallback to localStorage
-    const localEdit = getShiftEdit(empId, dateStr, shiftType);
+    const localEdit = getShiftEdit(empId, dateStr, shiftType, dept);
     if (localEdit) {
       console.log('[ShiftsView] Retrieved localStorage shift edit for', key, ':', localEdit);
     }
@@ -1170,7 +1182,8 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
             const myAllShifts = myEntry?.shifts || (myShift !== 'off' ? [myShift] : []);
 
             // Кастомное время для моей смены
-            const myCustom    = linkedEmp ? getShiftEditFromFirebase(linkedEmp.id, dateStr, myShift) : null;
+            const myDept = linkedEmp?.department || linkedEmp?.role ? getDepartment(linkedEmp.role || linkedEmp.department || '') : null;
+            const myCustom = linkedEmp ? getShiftEditFromFirebase(linkedEmp.id, dateStr, myShift, myDept) : null;
             
             let myTimeStart = myCustom?.customStart ?? myTimes?.start;
             let myTimeEnd   = myCustom?.customEnd   ?? myTimes?.end;
@@ -1201,10 +1214,10 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
               const cMultipleShifts = cEntry?.multipleShifts;
               const cShiftsWithTimes = cEntry?.shiftsWithTimes;
               const color  = ensureColleagueColor(cEmp, index);
-              const cCustom = getShiftEditFromFirebase(cId, dateStr, cShift);
               const cRole = cEntry?.role || cEmp.role;
               const cDept = getDepartment(cRole);
               const cDeptIcon = cDept ? DEPARTMENT_CONFIG[cDept].icon : '';
+              const cCustom = getShiftEditFromFirebase(cId, dateStr, cShift, cDept);
               if (cCustom) {
                 console.log('[ShiftsView] Colleague shift has custom time:', { cId, dateStr, cCustom });
               }
