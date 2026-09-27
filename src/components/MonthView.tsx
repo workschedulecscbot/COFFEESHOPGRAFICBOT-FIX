@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ScheduleData, ShiftEntry, Employee, ShiftType, SHIFT_CONFIG, DEPARTMENT_CONFIG, Department, getDepartment } from '../types/schedule';
+import { ScheduleData, ShiftEntry, Employee, ShiftType, SHIFT_CONFIG, DEPARTMENT_CONFIG, Department, getDepartment, inferShiftTypeFromTimeRange } from '../types/schedule';
 import { getShiftEdit } from '../utils/adminEdits';
 import { useTheme } from '../context/ThemeContext';
 
@@ -30,17 +30,6 @@ function formatTimeRange(start?: string, end?: string) {
   const e = end ? end.slice(0, 2) : '';
   if (!s && !e) return '';
   return `${s}${s && e ? '–' : ''}${e}`;
-}
-
-// Infer coarse shift type from a time range (used when sheet contains explicit ranges like 09:00-20:00)
-function inferShiftTypeFromTimeRange(start?: string, end?: string): ShiftType {
-  if (!start || !end) return 'off';
-  const sh = parseInt(start.slice(0, 2), 10);
-  const eh = parseInt(end.slice(0, 2), 10);
-  if (isNaN(sh) || isNaN(eh)) return 'off';
-  // If range crosses midnight or starts late — treat as night
-  if (sh >= 20 || eh <= 9 || (eh <= sh)) return 'night';
-  return 'day';
 }
 
 type DaySegment = { label: string; color: string; dept: Department };

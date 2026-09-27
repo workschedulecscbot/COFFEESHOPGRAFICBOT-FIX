@@ -217,3 +217,16 @@ export interface ScheduleData {
   month?: number;
   year?: number;
 }
+
+/**
+ * Infer coarse shift type from a time range (used when sheet contains explicit ranges like 09:00-20:00)
+ */
+export function inferShiftTypeFromTimeRange(start?: string, end?: string): ShiftType {
+  if (!start || !end) return 'off';
+  const sh = parseInt(start.slice(0, 2), 10);
+  const eh = parseInt(end.slice(0, 2), 10);
+  if (isNaN(sh) || isNaN(eh)) return 'off';
+  // If range crosses midnight or starts late — treat as night
+  if (sh >= 20 || eh <= 9 || (eh <= sh)) return 'night';
+  return 'day';
+}
