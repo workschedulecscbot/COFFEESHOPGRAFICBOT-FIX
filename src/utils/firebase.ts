@@ -709,6 +709,7 @@ export async function deleteEmployeeRules(employeeId: string) {
 interface ShiftEditDoc {
   empId: string;
   date: string;
+  shiftType?: string;  // Add shiftType to allow multiple shifts per employee on same day
   customStart?: string;
   customEnd?: string;
   note?: string;
@@ -717,7 +718,8 @@ interface ShiftEditDoc {
 
 export async function setShiftEdit(edit: ShiftEditDoc): Promise<void> {
   try {
-    const docId = `${edit.empId}_${edit.date}`;
+    // Include shiftType in docId to allow multiple shifts per employee on same day
+    const docId = edit.shiftType ? `${edit.empId}_${edit.date}_${edit.shiftType}` : `${edit.empId}_${edit.date}`;
     const docRef = doc(db, 'shift_edits', docId);
     
     // Build payload - only include defined fields
@@ -727,6 +729,7 @@ export async function setShiftEdit(edit: ShiftEditDoc): Promise<void> {
       updatedAt: serverTimestamp(),
     };
     
+    if (edit.shiftType !== undefined) payload.shiftType = edit.shiftType;
     if (edit.customStart !== undefined) payload.customStart = edit.customStart;
     if (edit.customEnd !== undefined) payload.customEnd = edit.customEnd;
     if (edit.note !== undefined) payload.note = edit.note;
@@ -739,9 +742,9 @@ export async function setShiftEdit(edit: ShiftEditDoc): Promise<void> {
   }
 }
 
-export async function deleteShiftEditDoc(empId: string, date: string): Promise<void> {
+export async function deleteShiftEditDoc(empId: string, date: string, shiftType?: string): Promise<void> {
   try {
-    const docId = `${empId}_${date}`;
+    const docId = shiftType ? `${empId}_${date}_${shiftType}` : `${empId}_${date}`;
     const docRef = doc(db, 'shift_edits', docId);
     await deleteDoc(docRef);
     console.log('[Firebase] Shift edit deleted:', docId);

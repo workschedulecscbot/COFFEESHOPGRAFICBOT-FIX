@@ -114,7 +114,7 @@ interface EditShiftModalProps {
 const EditShiftModal: React.FC<EditShiftModalProps> = ({ emp, date, shift, onClose, onSaved, initialEdit }) => {
   const { isDark } = useTheme();
   const defaultTimes = SHIFT_TIMES[shift];
-  const existing = getShiftEdit(emp.id, date);
+  const existing = getShiftEdit(emp.id, date, shift);
   const editValues = initialEdit ?? existing;
 
   const [startTime, setStartTime] = useState(editValues?.customStart ?? defaultTimes?.start ?? '08:00');
@@ -133,19 +133,20 @@ const EditShiftModal: React.FC<EditShiftModalProps> = ({ emp, date, shift, onClo
       saveShiftEdit({
         empId: emp.id,
         date,
+        shiftType: shift,
         customStart: startTime,
         customEnd:   endTime,
         note:        note.trim() || undefined,
       });
     } else {
-      deleteShiftEdit(emp.id, date);
+      deleteShiftEdit(emp.id, date, shift);
     }
     onSaved();
     onClose();
   };
 
   const handleReset = () => {
-    deleteShiftEdit(emp.id, date);
+    deleteShiftEdit(emp.id, date, shift);
     onSaved();
     onClose();
   };
@@ -294,7 +295,9 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
       if (!mounted) return;
       const editMap: Record<string, any> = {};
       edits.forEach(edit => {
-        editMap[`${edit.empId}-${edit.date}`] = edit;
+        // Include shiftType in key to allow multiple shifts per employee on same day
+        const key = edit.shiftType ? `${edit.empId}-${edit.date}-${edit.shiftType}` : `${edit.empId}-${edit.date}`;
+        editMap[key] = edit;
       });
       console.log('[DayModal] Shift edits updated:', editMap);
       setFsShiftEdits(editMap);
@@ -337,9 +340,11 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
     };
   }, []);
 
-  const getCustomTimes = (empId: string, dateStr: string) => {
+  const getCustomTimes = (empId: string, dateStr: string, shiftType?: ShiftType) => {
     // Try Firebase first, then localStorage as fallback
-    const fbEdit = fsShiftEdits[`${empId}-${dateStr}`];
+    // Use shiftType in key to allow multiple shifts per employee on same day
+    const key = shiftType ? `${empId}-${dateStr}-${shiftType}` : `${empId}-${dateStr}`;
+    const fbEdit = fsShiftEdits[key];
     if (fbEdit) {
       return {
         customStart: fbEdit.customStart,
@@ -356,18 +361,25 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
     } : undefined;
   };
   const getNote = (empId: string) => {
-    // Prefer Firebase (emp_notes) over shift edits notes
-    return fsEmpNotes[empId] ?? fsShiftEdits[empId]?.note ?? '';
+    // Prefer Firebase shift_notes over emp_notes over shift edits notes
+    // shift_notes now includes shiftType in key for multiple shifts per day
+    // This function checks shift-specific notes first, then employee notes
+    const empNotes = fsEmpNotes[empId] ?? '';
+    if (empNotes) return empNotes;
+    
+    return fsShiftEdits[empId]?.note ?? '';
   };
-  const getShiftNote = (empId: string, dateStr: string) => {
+  const getShiftNote = (empId: string, dateStr: string, shiftType?: ShiftType) => {
     // Try Firebase shift_notes first (stored as { shiftId: "empId-date", text: "..." })
-    const fbShiftNote = fsShiftNotes[`${empId}-${dateStr}`];
+    // Use shiftType in key to allow multiple shifts per employee on same day
+    const key = shiftType ? `${empId}-${dateStr}-${shiftType}` : `${empId}-${dateStr}`;
+    const fbShiftNote = fsShiftNotes[key];
     if (fbShiftNote) return fbShiftNote;
-    
+
     // Fallback to shift edit note
-    const fbEdit = fsShiftEdits[`${empId}-${dateStr}`];
+    const fbEdit = fsShiftEdits[key];
     if (fbEdit?.note) return fbEdit.note;
-    
+
     return '';
   };
 
@@ -439,12 +451,22 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
       }
     } else if (allShifts.length > 1) {
       // *** ИСПРАВЛЕНИЕ БАГА: Если несколько разных типов смен (напр., дневная и ночная) ***
-      // Создаём отдельную запись для КАЖДОГО типа смены, используя правильный отдел для каждой
+      // Создаём отдельную запись для КАЖДОГО типа смены, используя правильный отдел из shiftRoles
       for (const shiftType of allShifts) {
         if (shiftType !== 'off') {
           const shiftRole = entry?.shiftRoles?.[shiftType] || role;
-          const shiftDept = getDepartment(shiftRole) ?? dept;
-          working.push({ emp, name: emp.name, role: shiftRole, color, shift: shiftType, dept: shiftDept, isMe, hours });
+          // Получаем отдел конкретно из shiftRoles для каждой смены, без fallback
+          const shiftDept = getDepartment(shiftRole);
+          working.push({
+            emp,
+            name: emp.name,
+            role: shiftRole,
+            color: getDeptColorByRole(shiftRole, emp.color),
+            shift: shiftType,
+            dept: shiftDept ?? emp.department ?? 'kitchen',  // fallback только если ни один отдел не найден
+            isMe,
+            hours
+          });
         }
       }
     } else {
@@ -548,9 +570,9 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
                         </div>
                         <div className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-gray-50'}`}>
                           {sg.map((w, i) => {
-                            const custom    = getCustomTimes(w.emp.id, dateStr);
+                            const custom    = getCustomTimes(w.emp.id, dateStr, w.shift);
                             const empNote   = getNote(w.emp.id);
-                            const shiftNote = getShiftNote(w.emp.id, dateStr);
+                            const shiftNote = getShiftNote(w.emp.id, dateStr, w.shift);
                             const timeStart = custom?.customStart ?? SHIFT_TIMES[w.shift]?.start;
                             const timeEnd   = custom?.customEnd   ?? SHIFT_TIMES[w.shift]?.end;
                             const hasCustomTime = custom?.customStart || custom?.customEnd;
@@ -626,7 +648,7 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
                       <div className={`divide-y ${isDark ? 'divide-slate-700' : 'divide-gray-50'}`}>
                         {group.filter(w => w.birthday && w.shift === 'off' && !w.hours).map((w, i) => {
                           const empNote = getNote(w.emp.id);
-                          const shiftNote = getShiftNote(w.emp.id, dateStr);
+                          const shiftNote = getShiftNote(w.emp.id, dateStr, w.shift);
                           return (
                             <div key={i} className={`flex items-start gap-3 px-4 py-2.5 ${w.isMe ? isDark ? 'bg-indigo-900/30' : 'bg-indigo-50' : ''}`}>
                               <div
@@ -683,7 +705,7 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
                         {group.filter(w => w.shift === 'off' && (w.hours || w.startTime)).map((w, i) => {
                           const workedHours = w.hours;
                           const empNote = getNote(w.emp.id);
-                          const shiftNote = getShiftNote(w.emp.id, dateStr);
+                          const shiftNote = getShiftNote(w.emp.id, dateStr, w.shift);
                           const deptCfg = DEPARTMENT_CONFIG[w.dept];
                           const displayTime = w.startTime && w.endTime ? `${w.startTime.slice(0,2)}-${w.endTime.slice(0,2)}` : undefined;
                           return (
@@ -768,7 +790,7 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, data, linkedEmpId
           emp={editingShift.emp}
           date={dateStr}
           shift={editingShift.shift}
-          initialEdit={getCustomTimes(editingShift.emp.id, dateStr)}
+          initialEdit={getCustomTimes(editingShift.emp.id, dateStr, editingShift.shift)}
           onClose={() => setEditingShift(null)}
           onSaved={handleSaved}
         />
@@ -1012,15 +1034,15 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
   const linkedEmp = linkedEmpId ? data.employees.find(e => e.id === linkedEmpId) : null;
 
   // Get shift edit from Firebase map first, fallback to localStorage
-  const getShiftEditFromFirebase = (empId: string, dateStr: string) => {
-    const key = `${empId}-${dateStr}`;
+  const getShiftEditFromFirebase = (empId: string, dateStr: string, shiftType?: string) => {
+    const key = shiftType ? `${empId}-${dateStr}-${shiftType}` : `${empId}-${dateStr}`;
     const fbEdit = shiftEditsMap[key];
     if (fbEdit) {
       console.log('[ShiftsView] Retrieved Firebase shift edit for', key, ':', fbEdit);
       return fbEdit;
     }
     // Fallback to localStorage
-    const localEdit = getShiftEdit(empId, dateStr);
+    const localEdit = getShiftEdit(empId, dateStr, shiftType);
     if (localEdit) {
       console.log('[ShiftsView] Retrieved localStorage shift edit for', key, ':', localEdit);
     }
@@ -1131,7 +1153,7 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
             const myAllShifts = myEntry?.shifts || (myShift !== 'off' ? [myShift] : []);
 
             // Кастомное время для моей смены
-            const myCustom    = linkedEmp ? getShiftEditFromFirebase(linkedEmp.id, dateStr) : null;
+            const myCustom    = linkedEmp ? getShiftEditFromFirebase(linkedEmp.id, dateStr, myShift) : null;
             
             let myTimeStart = myCustom?.customStart ?? myTimes?.start;
             let myTimeEnd   = myCustom?.customEnd   ?? myTimes?.end;
@@ -1162,7 +1184,7 @@ export const ShiftsView: React.FC<ShiftsViewProps> = ({ data, fakeDate, linkedEm
               const cMultipleShifts = cEntry?.multipleShifts;
               const cShiftsWithTimes = cEntry?.shiftsWithTimes;
               const color  = ensureColleagueColor(cEmp, index);
-              const cCustom = getShiftEditFromFirebase(cId, dateStr);
+              const cCustom = getShiftEditFromFirebase(cId, dateStr, cShift);
               const cRole = cEntry?.role || cEmp.role;
               const cDept = getDepartment(cRole);
               const cDeptIcon = cDept ? DEPARTMENT_CONFIG[cDept].icon : '';

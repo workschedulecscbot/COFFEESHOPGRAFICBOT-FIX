@@ -281,17 +281,26 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
 
         {error ? (
-          <div className={`flex items-start gap-2 rounded-xl p-3 border ${
+          <div className={`flex flex-col gap-2 rounded-xl p-3 border ${
             isDark ? 'bg-red-900/20 border-red-800/40' : 'bg-red-50 border-red-100'
           }`}>
-            <span className="text-red-500 text-lg">⚠️</span>
-            <div>
-              <p className="text-xs font-semibold text-red-500">Ошибка загрузки</p>
-              <p className="text-xs text-red-400 mt-0.5">{error}</p>
-              <p className={`text-xs mt-1.5 ${sublabel}`}>
-                Убедитесь, что таблица открыта для просмотра всем с ссылкой.
-              </p>
+            <div className="flex items-start gap-2">
+              <span className="text-red-500 text-lg">⚠️</span>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-red-500">Ошибка загрузки</p>
+                <p className="text-xs text-red-400 mt-0.5">{error}</p>
+                <p className={`text-xs mt-1.5 ${sublabel}`}>
+                  Проверьте интернет-соединение и попробуйте снова
+                </p>
+              </div>
             </div>
+            <button
+              onClick={onRefresh}
+              disabled={isLoading || !sheetId}
+              className="w-full py-2 rounded-lg text-xs font-semibold bg-red-500 text-white hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+            >
+              ↻ <span className={isLoading ? 'animate-spin inline-block' : ''}>Повторить попытку</span>
+            </button>
           </div>
         ) : (
           <div className="flex items-center gap-2">

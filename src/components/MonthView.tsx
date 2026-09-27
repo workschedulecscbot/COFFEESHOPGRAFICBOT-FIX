@@ -45,14 +45,19 @@ function inferShiftTypeFromTimeRange(start?: string, end?: string): ShiftType {
 
 type DaySegment = { label: string; color: string; dept: Department };
 
-function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: ShiftEntry[]): DaySegment[] {
+function getDaySegmentsForEmployee(emp: Employee, dateStr: string, shifts: ShiftEntry[], shiftType?: ShiftType): DaySegment[] {
   const entry = shifts.find(s => s.employeeId === emp.id && s.date === dateStr);
   if (!entry) return [];
 
   const baseRole = entry.role || emp.role;
   const deptBase = getDepartment(baseRole) ?? emp.department ?? 'kitchen';
 
-  const edit = getShiftEdit(emp.id, dateStr);
+  // Use provided shiftType, or default to entry.shift
+  const useShift = shiftType || (entry.shiftsWithTimes && entry.shiftsWithTimes.length > 0 
+    ? inferShiftTypeFromTimeRange(entry.shiftsWithTimes[0].startTime, entry.shiftsWithTimes[0].endTime)
+    : entry.shift);
+
+  const edit = getShiftEdit(emp.id, dateStr, useShift);
   if (edit?.customStart && edit?.customEnd) {
     const label = formatTimeRange(edit.customStart, edit.customEnd);
     const color = DEPARTMENT_CONFIG[deptBase].color;
@@ -164,7 +169,7 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
     if (shift === 'off' && !entry?.hours && !entry?.multipleShifts && allShifts.length === 0) return;
     const dept = getDepartment(role) ?? emp.department ?? null;
     // Получаем админские часы
-    const custom = getShiftEdit(emp.id, dateStr);
+    const custom = getShiftEdit(emp.id, dateStr, shift);
     const customStart = custom?.customStart;
     const customEnd = custom?.customEnd;
     if (shift === 'vacation' || shift === 'sick') {
@@ -524,7 +529,7 @@ export const MonthView: React.FC<MonthViewProps> = ({ data, month, year, fakeDat
             const isMyShift = myShift !== null && myShift !== 'off';
 
   const linkedEmp = linkedEmpId ? data.employees.find(e => e.id === linkedEmpId) ?? null : null;
-  const mySegments = linkedEmp ? getDaySegmentsForEmployee(linkedEmp, dateStr, data.shifts) : [];
+  const mySegments = linkedEmp ? getDaySegmentsForEmployee(linkedEmp, dateStr, data.shifts, myShift) : [];
 
   // No per-day aggregate custom hours shown for anonymous calendar cells
   let customHours: string | null = null;

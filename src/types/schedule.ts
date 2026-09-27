@@ -117,7 +117,7 @@ export const DEPARTMENT_CONFIG: Record<Department, DepartmentConfig> = {
     color: '#0369a1',
     bgColor: 'bg-sky-50',
     textColor: 'text-sky-800',
-    roles: ['официант ст.', 'официант ст', 'старший официант', 'официант'],
+    roles: ['официант ст.', 'официант ст', 'старший официант', 'официант', 'раннер'],
   },
   kitchen: {
     label: 'Кухня',

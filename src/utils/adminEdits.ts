@@ -3,6 +3,7 @@
 export interface ShiftEdit {
   empId: string;
   date: string;          // yyyy-mm-dd
+  shiftType?: string;    // Add shiftType to allow multiple shifts per employee on same day
   customStart?: string;  // "11:00"
   customEnd?: string;    // "20:00"
   note?: string;         // примечание к конкретной смене
@@ -29,8 +30,8 @@ import { addShiftNote, deleteShiftNotes, setShiftEdit, deleteShiftEditDoc, setEm
 
 function saveShiftEditToLocal(edit: ShiftEdit) {
   const all = loadShiftEdits();
-  const idx = all.findIndex(e => e.empId === edit.empId && e.date === edit.date);
-  const updated: ShiftEdit = { empId: edit.empId, date: edit.date, customStart: edit.customStart, customEnd: edit.customEnd, note: edit.note };
+  const idx = all.findIndex(e => e.empId === edit.empId && e.date === edit.date && e.shiftType === edit.shiftType);
+  const updated: ShiftEdit = { empId: edit.empId, date: edit.date, shiftType: edit.shiftType, customStart: edit.customStart, customEnd: edit.customEnd, note: edit.note };
   if (idx >= 0) {
     all[idx] = updated;
   } else {
@@ -44,19 +45,21 @@ function saveShiftEditToLocal(edit: ShiftEdit) {
   }
 }
 
-function deleteShiftEditFromLocal(empId: string, date: string) {
+function deleteShiftEditFromLocal(empId: string, date: string, shiftType?: string) {
   const all = loadShiftEdits();
-  const filtered = all.filter(e => !(e.empId === empId && e.date === date));
+  const filtered = shiftType
+    ? all.filter(e => !(e.empId === empId && e.date === date && e.shiftType === shiftType))
+    : all.filter(e => !(e.empId === empId && e.date === date));
   try {
     localStorage.setItem(STORAGE_SHIFT_EDITS, JSON.stringify(filtered));
-    console.log('[AdminEdits] Shift edit removed from localStorage:', { empId, date });
+    console.log('[AdminEdits] Shift edit removed from localStorage:', { empId, date, shiftType });
   } catch (err) {
     console.error('[AdminEdits] Failed to remove shift edit from localStorage:', err);
   }
 }
 
 export function saveShiftEdit(edit: ShiftEdit): void {
-  console.log('[AdminEdits] Saving shift edit to Firebase:', { empId: edit.empId, date: edit.date });
+  console.log('[AdminEdits] Saving shift edit to Firebase:', { empId: edit.empId, date: edit.date, shiftType: edit.shiftType });
 
   // Persist locally immediately so UI updates without waiting for Firebase
   saveShiftEditToLocal(edit);
@@ -65,6 +68,7 @@ export function saveShiftEdit(edit: ShiftEdit): void {
   setShiftEdit({
     empId: edit.empId,
     date: edit.date,
+    shiftType: edit.shiftType,
     customStart: edit.customStart,
     customEnd: edit.customEnd,
     note: edit.note,
@@ -89,14 +93,14 @@ export function saveShiftEdit(edit: ShiftEdit): void {
   // Note: We don't try to delete shift_notes here, as it's not critical if they exist
 }
 
-export function deleteShiftEdit(empId: string, date: string): void {
-  console.log('[AdminEdits] Deleting shift edit:', { empId, date });
+export function deleteShiftEdit(empId: string, date: string, shiftType?: string): void {
+  console.log('[AdminEdits] Deleting shift edit:', { empId, date, shiftType });
 
   // Delete locally first so UI updates immediately
-  deleteShiftEditFromLocal(empId, date);
+  deleteShiftEditFromLocal(empId, date, shiftType);
 
   // Delete the shift edit document completely from Firebase (primary)
-  deleteShiftEditDoc(empId, date).then(() => {
+  deleteShiftEditDoc(empId, date, shiftType).then(() => {
     console.log('[AdminEdits] Shift edit deleted from Firebase successfully');
   }).catch((err) => {
     console.error('[AdminEdits] Failed to delete shift edit from Firebase:', err);
@@ -104,7 +108,7 @@ export function deleteShiftEdit(empId: string, date: string): void {
   });
 
   // Also delete associated shift notes (async, non-critical)
-  const shiftKey = `${empId}-${date}`;
+  const shiftKey = shiftType ? `${empId}-${date}-${shiftType}` : `${empId}-${date}`;
   deleteShiftNotes(shiftKey).catch((err) => {
     // Non-critical error - just log it
     console.log('[AdminEdits] Shift notes cleanup info (non-critical):', err?.message || 'unknown');
@@ -116,8 +120,8 @@ export function deleteShiftEdit(empId: string, date: string): void {
   });
 }
 
-export function getShiftEdit(empId: string, date: string): ShiftEdit | null {
-  return loadShiftEdits().find(e => e.empId === empId && e.date === date) ?? null;
+export function getShiftEdit(empId: string, date: string, shiftType?: string): ShiftEdit | null {
+  return loadShiftEdits().find(e => e.empId === empId && e.date === date && e.shiftType === shiftType) ?? null;
 }
 
 // ── Примечания к сотрудникам ─────────────────────────────────────────

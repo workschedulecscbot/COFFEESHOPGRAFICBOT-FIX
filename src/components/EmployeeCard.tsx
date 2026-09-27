@@ -71,7 +71,7 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
   const todayTimes  = SHIFT_TIMES[todayShift];
   
   // Получаем кастомное время на сегодня, если администратор его задал
-  const todayCustomEdit = getShiftEdit(emp.id, todayStr);
+  const todayCustomEdit = getShiftEdit(emp.id, todayStr, todayShift);
   const todayDisplayStart = todayCustomEdit?.customStart || todayTimes?.start;
   const todayDisplayEnd = todayCustomEdit?.customEnd || todayTimes?.end;
 
@@ -292,7 +292,7 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({
                 
                 // Получаем кастомное время, если администратор его задал
                 const dateStr = formatDate(cardYear, cardMonth, day);
-                const customEdit = getShiftEdit(emp.id, dateStr);
+                const customEdit = getShiftEdit(emp.id, dateStr, shift);
                 const displayStart = customEdit?.customStart || times?.start;
                 const displayEnd = customEdit?.customEnd || times?.end;
 

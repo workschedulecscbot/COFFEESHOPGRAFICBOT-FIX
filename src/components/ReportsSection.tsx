@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ScheduleData, ShiftEntry, Employee, getDepartment } from '../types/schedule';
+import { ScheduleData, ShiftEntry, Employee, getDepartment, inferShiftTypeFromTimeRange } from '../types/schedule';
 import { useTheme } from '../context/ThemeContext';
 import { getShiftEdit } from '../utils/adminEdits';
 
@@ -84,7 +84,11 @@ interface MonthlyReport {
 
 function getShiftSegments(shift: ShiftEntry, emp: Employee): Array<{ role: string; hours: number }> {
   const baseRole = shift.role || emp.role;
-  const edit = getShiftEdit(emp.id, shift.date);
+  const shiftType = shift.shiftsWithTimes && shift.shiftsWithTimes.length > 0
+    ? inferShiftTypeFromTimeRange(shift.shiftsWithTimes[0].startTime, shift.shiftsWithTimes[0].endTime)
+    : (shift.shift ?? 'off');
+
+  const edit = getShiftEdit(emp.id, shift.date, shiftType);
 
   // Если админ изменил время — используем его
   if (edit?.customStart && edit?.customEnd) {
