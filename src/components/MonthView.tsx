@@ -154,8 +154,8 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
     const allShifts = entry?.shifts || (shift !== 'off' ? [shift] : []);
     const role = entry?.role || emp.role;
     
-    // Пропускаем только если нет ни смены, ни часов (multipleShifts)
-    if (shift === 'off' && !entry?.hours && !entry?.multipleShifts && allShifts.length === 0) return;
+    // Пропускаем только если нет ни смены, ни часов (multipleShifts), ни shiftEntries
+    if (shift === 'off' && !entry?.hours && !entry?.multipleShifts && allShifts.length === 0 && !entry?.shiftEntries) return;
     const dept = getDepartment(role) ?? emp.department ?? null;
     // Получаем админские часы
     const custom = getShiftEdit(emp.id, dateStr, shift);
@@ -164,9 +164,27 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
     if (shift === 'vacation' || shift === 'sick') {
       absent.push({ name: emp.name, role, color: emp.color, shift });
     } else {
+      // ★ ПРИОРИТЕТ 1: shiftEntries — массив ВСЕХ смен включая дубликаты по типу
+      // (напр., две дневных смены на разных должностях). Каждая смена = отдельная запись в нужном отделе.
+      if (entry?.shiftEntries && entry.shiftEntries.length > 0) {
+        for (const se of entry.shiftEntries) {
+          if (se.shift !== 'off') {
+            const seCustom = getShiftEdit(emp.id, dateStr, se.shift);
+            working.push({
+              name: emp.name,
+              role: se.role,
+              color: emp.color,
+              shift: se.shift,
+              dept: se.dept,
+              customStart: seCustom?.customStart,
+              customEnd: seCustom?.customEnd,
+            });
+          }
+        }
+      }
       // Если в ячейке указаны конкретные тайм-диапазоны (например "Бармен 09-20"),
       // создаём отдельную запись для каждого диапазона чтобы показать их как плашки времени.
-      if (entry?.shiftsWithTimes && entry.shiftsWithTimes.length > 0) {
+      else if (entry?.shiftsWithTimes && entry.shiftsWithTimes.length > 0) {
         for (const swt of entry.shiftsWithTimes) {
           const roleForShift = swt.role || emp.roles?.find(r => getDepartment(r) === swt.dept) || role;
           const inferredShift = inferShiftTypeFromTimeRange(swt.startTime, swt.endTime);
@@ -183,18 +201,18 @@ const DayModal: React.FC<DayModalProps> = ({ day, month, year, date, data, onClo
       } else if (entry?.multipleShifts && entry.multipleShifts.length > 1) {
         // Для каждого отдела в multipleShifts добавляем отдельную запись
         entry.multipleShifts.forEach(ms => {
-          working.push({ 
-            name: emp.name, 
-            role, 
-            color: emp.color, 
-            shift, 
-            dept: ms.dept as Department, 
-            customStart, 
-            customEnd 
+          working.push({
+            name: emp.name,
+            role,
+            color: emp.color,
+            shift,
+            dept: ms.dept as Department,
+            customStart,
+            customEnd
           });
         });
       } else if (allShifts.length > 1) {
-        // *** ИСПРАВЛЕНИЕ БАГА: Если несколько разных типов смен (напр., дневная и ночная) ***
+        // Если несколько разных типов смен (напр., дневная и ночная)
         // Создаём отдельную запись для КАЖДОГО типа смены с правильным отделом
         for (const shiftType of allShifts) {
           if (shiftType !== 'off') {

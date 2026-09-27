@@ -314,50 +314,63 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
         } else if (hours && hours > 0) {
           // Если уже был найден другой числовой часовойчёт, нужно сложить по департаментам.
           const existingDept = getDepartment(existing.role ?? emp.role) ?? deptForRow;
-          const existingShifts: Array<{ dept: 'bar' | 'kitchen' | 'hall' | 'power' | 'bar_manager'; hours: number; role?: string }> = [];
+          const existingShiftsArr: Array<{ dept: 'bar' | 'kitchen' | 'hall' | 'power' | 'bar_manager'; hours: number; role?: string }> = [];
 
           if (existing.multipleShifts && existing.multipleShifts.length > 0) {
-            existingShifts.push(...existing.multipleShifts);
+            existingShiftsArr.push(...existing.multipleShifts);
           } else if (existing.hours && existing.hours > 0) {
-            existingShifts.push({ dept: existingDept, hours: existing.hours, role: existing.role });
+            existingShiftsArr.push({ dept: existingDept, hours: existing.hours, role: existing.role });
           }
 
-          existingShifts.push({ dept: deptForRow, hours, role: roleCell });
-          const total = existingShifts.reduce((sum, s) => sum + s.hours, 0);
+          existingShiftsArr.push({ dept: deptForRow, hours, role: roleCell });
+          const total = existingShiftsArr.reduce((sum, s) => sum + s.hours, 0);
 
           shifts[existingIdx] = {
             ...existing,
             hours: total,
-            multipleShifts: existingShifts,
+            multipleShifts: existingShiftsArr,
           };
         } else if (shift !== 'off' && existing.shift === 'off') {
-          // Новая информация — рабочая смена, прежняя была off
-          shifts[existingIdx] = { employeeId: emp!.id, date: isoDate, shift, role: roleCell || undefined };
-        } else if (shift !== 'off' && existing.shift !== 'off' && shift !== existing.shift) {
-          // *** ИСПРАВЛЕНИЕ БАГА: Обе смены реальные и разные (напр., дневная и ночная) ***
-          // Накапливаем оба типа смен в массив shifts[] и отслеживаем роль для каждой смены
-          const existingShifts = existing.shifts || [existing.shift];
+          // Новая информация — рабочая смена, прежняя была off.
+          // Записываем смену в shiftEntries (массив всех смен включая дубликаты по типу).
+          shifts[existingIdx] = {
+            employeeId: emp!.id,
+            date: isoDate,
+            shift,
+            role: roleCell || undefined,
+            shiftEntries: [{ shift, role: roleCell || emp.role, dept: deptForRow }],
+          };
+        } else if (shift !== 'off' && existing.shift !== 'off') {
+          // *** ИСПРАВЛЕНИЕ БАГА: Обе смены реальные (одинакового или разного типа) ***
+          // Накапливаем все смены в shifts[] (уникальные типы) и shiftRoles,
+          // а также ВСЕ смены (включая дубликаты по типу) в shiftEntries.
+          const existingShiftsArr = existing.shifts || [existing.shift];
           const existingRoles = existing.shiftRoles || {};
-          
+
           // Записываем роль существующей смены
           if (!existingRoles[existing.shift]) {
             existingRoles[existing.shift] = existing.role || emp.role;
           }
-          
-          // Добавляем новую смену
-          if (!existingShifts.includes(shift)) {
-            existingShifts.push(shift);
+
+          // Добавляем новый тип смены в shifts[] (если ещё нет)
+          if (!existingShiftsArr.includes(shift)) {
+            existingShiftsArr.push(shift);
           }
-          
+
           // Записываем роль новой смены
           existingRoles[shift] = roleCell || emp.role;
-          
+
+          // shiftEntries: накапливаем ВСЕ смены, включая дубликаты по типу
+          const shiftEntries = existing.shiftEntries
+            ? [...existing.shiftEntries]
+            : [{ shift: existing.shift, role: existing.role || emp.role, dept: getDepartment(existing.role || emp.role) ?? deptForRow }];
+          shiftEntries.push({ shift, role: roleCell || emp.role, dept: deptForRow });
+
           // Сохраняем доминирующую смену как основную для обратной совместимости
-          const allShifts = existingShifts;
           const SHIFT_PRIORITY: ShiftType[] = ['sick','vacation','daily','day','night','off'];
           let dominant = 'off' as ShiftType;
           for (const s of SHIFT_PRIORITY) {
-            if (allShifts.includes(s)) {
+            if (existingShiftsArr.includes(s)) {
               dominant = s;
               break;
             }
@@ -365,8 +378,9 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
           shifts[existingIdx] = {
             ...existing,
             shift: dominant,
-            shifts: allShifts,
+            shifts: existingShiftsArr,
             shiftRoles: existingRoles,
+            shiftEntries,
           };
         }
       } else {
@@ -377,6 +391,10 @@ export function parseGoogleSheetsCSV(input: string | string[][]): ScheduleData {
         if (hours && hours > 0) {
           newEntry.hours = hours;
           newEntry.multipleShifts = [{ dept: deptForRow, hours, role: roleCell }];
+        }
+        // Записываем рабочую смену в shiftEntries (массив всех смен)
+        if (shift !== 'off' && !shiftsWithTimes && !multipleShifts && !hours) {
+          newEntry.shiftEntries = [{ shift, role: roleCell || emp.role, dept: deptForRow }];
         }
         shifts.push(newEntry as any);
       }

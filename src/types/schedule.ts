@@ -207,6 +207,9 @@ export interface ShiftEntry {
   hours?: number;     // необязательное поле — количество часов, если в таблице указано число
   multipleShifts?: MultipleShift[];  // несколько смен в день с часами (например, 3ч бар + 2ч кухня)
   shiftsWithTimes?: ShiftWithTime[];  // несколько смен с временем (например, Бармен 12-15, Повар 15-17)
+  // ВСЕ смены за день включая дубликаты по типу (напр., две дневных смены на разных должностях).
+  // Каждая запись = отдельная смена с role и dept. Используется DayModal для отображения каждой смены отдельно.
+  shiftEntries?: Array<{ shift: ShiftType; role: string; dept: Department }>;
 }
 
 export interface ScheduleData {
