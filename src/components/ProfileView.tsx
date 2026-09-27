@@ -197,15 +197,7 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({
         </div>
       </div>
 
-      {/* Очистка localStorage */}
-      <div className={`rounded-2xl p-4 border shadow-sm ${card}`}>
-        <h3 className={`font-bold text-sm mb-3 ${lbl}`}>🧹 Очистить данные</h3>
-        <p className={`text-xs mb-3 ${sub}`}>Полностью удалить все локальные данные и привязки на этом устройстве.</p>
-        <button
-          onClick={handleClearLocalStorage}
-          className="w-full py-3 rounded-xl bg-red-500 text-white font-semibold text-sm active:scale-95 transition-all hover:bg-red-600"
-        >Очистить данные</button>
-      </div>
+      {/* Убрана кнопка "Очистить данные" для оптимизации */}
 
       {/* Google Sheets — только администраторы */}
       {isAdmin && (
@@ -397,39 +389,9 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({
             >
               💬 Отправить
             </button>
-            <button
-              onClick={async () => {
-                try {
-                  alert('🔍 Запускается комплексный тест Firebase (CRUD)...');
-                  const results = await testFullFirebase();
-                  alert(`✅ Тест завершён! Пройдено коллекций: ${results.filter(r => r.write.success && r.delete.success).length}/${results.length}. Подробности в консоли`);
-                } catch (e) {
-                  alert(`❌ Ошибка теста: ${e}`);
-                }
-              }}
-              className="py-2.5 rounded-xl font-semibold text-sm active:scale-95 transition-all bg-blue-500 hover:bg-blue-600 text-white"
-            >
-              🧪 Полный CRUD тест Firebase
-            </button>
-            {/* Удалена дублирующаяся кнопка Firestore Index Error Test */}
-          </div>
-          <p className={`text-xs mt-2 ${sub}`}>Скопируйте отладку и отправьте в чат @milkaaasss</p>
-        </div>
+            {/* Убрана кнопка "Полный CRUD тест Firebase" для оптимизации */}
       )}
-            <button
-              onClick={async () => {
-                try {
-                  alert('🧪 Запуск теста индексации Firestore...');
-                  await testFirestoreIndexError();
-                  alert('✅ Тест индексации завершён! Подробности в консоли.');
-                } catch (e) {
-                  alert(`❌ Ошибка теста индексации: ${e}`);
-                }
-              }}
-              className="py-2.5 rounded-xl font-semibold text-sm active:scale-95 transition-all bg-red-500 hover:bg-red-600 text-white"
-            >
-              🔥 Firestore Index Error Test
-            </button>
+            {/* Убрана кнопка "Firestore Index Error Test" для оптимизации */}
 
     </div>
   );

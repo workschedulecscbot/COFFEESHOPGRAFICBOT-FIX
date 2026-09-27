@@ -12,7 +12,16 @@ export interface TestResult {
   totalTime: number;
 }
 
+// ✅ ПАРАМЕТР ОТКЛЮЧЕНИЯ ВСЕХ ИСПЫТАНИЙ FIREBASE (оптимизация загрузки)
+const FIREBASE_TESTS_DISABLED = true;
+
 export async function testFullFirebase(): Promise<TestResult[]> {
+  // ✅ Тесты отключены - вернуть пустой массив для оптимизации
+  if (FIREBASE_TESTS_DISABLED) {
+    console.log('⏸️ [Firebase] Tests are disabled (FIREBASE_TESTS_DISABLED=true)');
+    return [];
+  }
+
   console.log('🔍 [Firebase] Starting comprehensive CRUD test...');
   
   const results: TestResult[] = [];
@@ -153,6 +162,12 @@ export async function testWriteReadDelete(collectionName: string = 'test_index_c
  * Тестовый запрос для искусственного вызова ошибки индексации Firestore
  */
 export async function testFirestoreIndexError() {
+  // ✅ Тест отключен для оптимизации
+  if (FIREBASE_TESTS_DISABLED) {
+    console.log('⏸️ [Firebase] Index tests are disabled (FIREBASE_TESTS_DISABLED=true)');
+    return;
+  }
+
   const indexTests = [
     { collection: 'shifts',        whereField: 'employeeId', whereValue: 'test-emp-456', orderField: 'start' },
     { collection: 'shift_notes',   whereField: 'shiftId',    whereValue: 'test-shift-123', orderField: 'createdAt' },

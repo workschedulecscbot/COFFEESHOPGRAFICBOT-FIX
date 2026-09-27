@@ -12,10 +12,10 @@ ensureAnonymousAuth().then(uid => {
   testConnection().catch(err => {
     console.error('[Main] Firebase test connection failed:', err);
   });
-  // Запускаем полный CRUD тест в фоне
-  testFullFirebase().catch(err => {
-    console.error('[Main] Firebase full CRUD test failed:', err);
-  });
+  // Запуск полного CRUD теста отключен для оптимизации загрузки
+  // testFullFirebase().catch(err => {
+  //   console.error('[Main] Firebase full CRUD test failed:', err);
+  // });
   
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
